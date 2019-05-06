@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "core",
+    "plugins/input/filesystem/tpm2",
+    "plugins/output/serial/tpm2",
+]

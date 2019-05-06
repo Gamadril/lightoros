@@ -1,0 +1,28 @@
+{
+    "max_input_inactivity_period": 1000,
+    "plugins": {
+        "input": [{
+            "name": "FilesystemInputTPM2",
+            "config": {
+                "files": [
+                    "stripe.out"
+                ],
+                "repeat": false,
+                "delay_frame": 100,
+                "delay_file": 5000
+            },
+            "priority": 1
+        }],
+        "output": [{
+            "name": "SerialOutputTPM2",
+            "config": {
+                "port": "/dev/tty.usbmodem14101"
+            }
+        }, {
+            "name": "SerialOutputTPM2",
+            "config": {
+                "port": "/dev/tty.usbmodem14201"
+            }
+        }]
+    }
+}
