@@ -1,21 +1,20 @@
-
 use clap::crate_version;
-use serde::{Deserialize};
-use serde_json::Value;
 use clap::{App, Arg};
-use std::sync::mpsc;
-use std::sync::mpsc::{Receiver, Sender};
+use libloading::{Library, Symbol};
+use serde::Deserialize;
+use serde_json::Value;
+use std::env::current_dir;
+use std::fmt;
+use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
-use std::fs;
+use std::sync::mpsc;
+use std::sync::mpsc::{Receiver, Sender};
+use std::sync::Arc;
 use std::thread;
 use std::thread::JoinHandle;
 use std::thread::ThreadId;
 use std::time::{Duration, Instant};
-use std::fmt;
-use std::sync::Arc;
-use libloading::{Library, Symbol};
-use std::env::current_dir;
 
 use lightoros_plugin::*;
 
@@ -48,19 +47,18 @@ struct InputPipe {
     //id: ThreadId,
     name: String,
     channel_out: Sender<InputEvent>,
-    input: Box<PluginInputTrait>,
-    transformations: Vec<Box<PluginTransformTrait>>,
+    input: Box<dyn PluginInputTrait>,
+    transformations: Vec<Box<dyn PluginTransformTrait>>,
 }
 
 struct OutputPipe {
     //handle: Option<JoinHandle<()>>,
     //id: ThreadId,
-    channel_in: Receiver<Arc<RgbData>>,
+    channel_in: Receiver<Arc<TraitData>>,
     name: String,
-    output: Box<PluginOutputTrait>,
-    transformations: Vec<Box<PluginTransformTrait>>,
+    output: Box<dyn PluginOutputTrait>,
+    transformations: Vec<Box<dyn PluginTransformTrait>>,
 }
-
 
 // main entry point
 fn main() {
@@ -136,21 +134,32 @@ fn main() {
             .spawn(move || {
                 let mut input = pipe.input;
                 let tx = pipe.channel_out;
+
+                let initialized = input.init();
+                if !initialized {
+                    eprintln!(
+                        "Failed to initialized plugin '{}'",
+                        thread::current().name().unwrap()
+                    );
+                    return;
+                }
+
                 loop {
-                    // get data from input 
-                    let mut rgb_data = match input.get() {
+                    // get data from input
+                    let mut data_in = match input.get() {
                         Some(data) => data,
                         None => {
+                            eprintln!("Failed getting data from input. sleeping");
                             thread::sleep(Duration::from_millis(5000));
                             continue;
                         }
                     };
                     // transform data if necessary
                     for transformator in &pipe.transformations {
-                        rgb_data = transformator.transform(&rgb_data);
+                        data_in = transformator.transform(&data_in);
                     }
                     // send data to the main thread
-                    let event = InputEvent::new(Arc::new(rgb_data));
+                    let event = InputEvent::new(Arc::new(data_in));
                     tx.send(event).unwrap();
                 }
             })
@@ -185,7 +194,7 @@ fn main() {
                 let rx = pipe.channel_in;
                 loop {
                     // wait for incoming data
-                    let data: Arc<RgbData> = match rx.recv() {
+                    let data_in: Arc<TraitData> = match rx.recv() {
                         Ok(data) => data,
                         Err(error) => {
                             eprintln!("Error receiving data: {}", error);
@@ -194,20 +203,22 @@ fn main() {
                         }
                     };
 
-                    let mut rgb_data_ref: &RgbData = &data;
-                    let mut rgb_data: RgbData;
+                    let mut data_ref: &TraitData = &data_in;
+                    let mut data_out: TraitData;
                     // transform data if necessary
                     for transformator in &pipe.transformations {
-                        rgb_data = transformator.transform(rgb_data_ref);
-                        rgb_data_ref = &rgb_data;
+                        data_out = transformator.transform(data_ref);
+                        data_ref = &data_out;
                     }
 
-                    let result = output.send(rgb_data_ref);
+                    let result = output.send(data_ref);
                     if !result {
-                        eprintln!("Error sending data to output plugin: {}", thread::current().name().unwrap());
+                        eprintln!(
+                            "Error sending data to output plugin: {}",
+                            thread::current().name().unwrap()
+                        );
                         thread::sleep(Duration::from_millis(5000));
                     }
-
                 }
             })
             .unwrap();
@@ -267,30 +278,29 @@ fn get_thread_by_id(id: ThreadId, input_threads: &Vec<InputThread>) -> Option<&I
 
 fn find_plugin_file(name: &str) -> Option<PathBuf> {
     // find plugins
-    let paths = fs::read_dir("./target/debug").unwrap();
+    let plugin_folder;
+
+    if cfg!(debug_assertions) {
+        plugin_folder = "./target/debug";
+    } else {
+        plugin_folder = "./target/release";
+    }
+
+    let paths = match fs::read_dir(plugin_folder) {
+        Ok(paths) => paths,
+        Err(e) => panic!("Cannot find plugins in folder '{}': {}", plugin_folder, e)
+    };
+
     for path in paths {
         let full_path = path.unwrap();
         let file_name = full_path.file_name();
 
         let is_dylib = file_name.to_str().unwrap().contains(".dylib");
+        let fname = file_name.to_str().unwrap();
 
-        // check input plugins
-        let is_plugin = file_name.to_str().unwrap().contains("lightoros_input");
-        if is_plugin && is_dylib {
-            let mut libfile_path = current_dir().unwrap();
-            libfile_path.push(full_path.path());
-
-            let lib = Library::new(libfile_path.as_path()).unwrap();
-            let get_info: Symbol<fn() -> PluginInfo> = unsafe { lib.get(b"info").unwrap() };
-            let info = get_info();
-
-            if info.name == name {
-                return Some(libfile_path);
-            }
-        }
-
-        // check output plugins
-        let is_plugin = file_name.to_str().unwrap().contains("lightoros_output");
+        let is_plugin = fname.contains("lightoros_input")
+            || fname.contains("lightoros_output")
+            || fname.contains("lightoros_transform");
         if is_plugin && is_dylib {
             let mut libfile_path = current_dir().unwrap();
             libfile_path.push(full_path.path());
@@ -307,16 +317,35 @@ fn find_plugin_file(name: &str) -> Option<PathBuf> {
     None
 }
 
+fn create_transform_plugin(
+    name: &str,
+    config: &serde_json::Value,
+    lib_list: &mut Vec<Library>,
+) -> Box<dyn PluginTransformTrait> {
+    let path = match find_plugin_file(name) {
+        Some(path) => path,
+        _ => {
+            panic!("Unable to find plugin {}", name);
+        }
+    };
+    let lib = Library::new(path).unwrap();
+    lib_list.push(lib);
+    let lib = lib_list.last().unwrap();
+    let create: Symbol<fn(config: &Value) -> Box<dyn PluginTransformTrait>> =
+        unsafe { lib.get(b"create").unwrap() };
+    create(config)
+}
+
 fn create_output_plugin(
     name: &str,
     config: &serde_json::Value,
     lib_list: &mut Vec<Library>,
-) -> Box<PluginOutputTrait> {
+) -> Box<dyn PluginOutputTrait> {
     let path = find_plugin_file(name);
     let lib = Library::new(path.unwrap()).unwrap();
     lib_list.push(lib);
     let lib = lib_list.last().unwrap();
-    let create: Symbol<fn(config: &Value) -> Box<PluginOutputTrait>> =
+    let create: Symbol<fn(config: &Value) -> Box<dyn PluginOutputTrait>> =
         unsafe { lib.get(b"create").unwrap() };
     create(config)
 }
@@ -325,12 +354,12 @@ fn create_input_plugin(
     name: &str,
     config: &serde_json::Value,
     lib_list: &mut Vec<Library>,
-) -> Box<PluginInputTrait> {
+) -> Box<dyn PluginInputTrait> {
     let path = find_plugin_file(name);
     let lib = Library::new(path.unwrap()).unwrap();
     lib_list.push(lib);
     let lib = lib_list.last().unwrap();
-    let create: Symbol<fn(config: &Value) -> Box<PluginInputTrait>> =
+    let create: Symbol<fn(config: &Value) -> Box<dyn PluginInputTrait>> =
         unsafe { lib.get(b"create").unwrap() };
     create(config)
 }
@@ -365,14 +394,53 @@ fn create_input_pipe(
         return Some(pipe);
     } else if config_value.is_array() {
         // plugin chain
-        return None;
+        let plugin_infos = config_value.as_array().unwrap();
+
+        let plugin_info = plugin_infos[0].as_object().unwrap();
+        let plugin_name = match plugin_info.get("name") {
+            Some(name) => name.as_str().unwrap(),
+            None => {
+                eprintln!("Error reading the name of an input plugin");
+                return None;
+            }
+        };
+        let ref plugin_config = plugin_info["config"];
+        let priority: u8 = match plugin_info.get("priority") {
+            Some(priority) => priority.as_u64().unwrap() as u8,
+            None => {
+                eprintln!("Priority is missing for the input plugin {}", plugin_name);
+                0
+            }
+        };
+        let plugin = create_input_plugin(plugin_name, plugin_config, lib_list);
+        let mut pipe = InputPipe::new(plugin, channel);
+        pipe.priority = priority;
+        pipe.name = plugin_name.to_string();
+
+        if plugin_infos.len() > 1 {
+            for i in 1..plugin_infos.len() {
+                let plugin_info = plugin_infos[i].as_object().unwrap();
+                let plugin_name = match plugin_info.get("name") {
+                    Some(name) => name.as_str().unwrap(),
+                    None => {
+                        eprintln!("Error reading the name of the transform plugin");
+                        return None;
+                    }
+                };
+                let ref plugin_config = plugin_info["config"];
+                let plugin = create_transform_plugin(plugin_name, plugin_config, lib_list);
+                pipe.transformations.push(plugin);
+            }
+        }
+
+        return Some(pipe);
     }
 
     None
 }
 
 fn create_output_pipe(
-    channel: Receiver<Arc<RgbData>>,
+    channel: Receiver<Arc<TraitData>>,
     config_value: &serde_json::Value,
     lib_list: &mut Vec<Library>,
 ) -> Option<OutputPipe> {
@@ -394,7 +462,38 @@ fn create_output_pipe(
         return Some(pipe);
     } else if config_value.is_array() {
         // plugin chain
-        return None;
+        let plugin_infos = config_value.as_array().unwrap();
+
+        let plugin_info = plugin_infos.last()?.as_object().unwrap();
+        let plugin_name = match plugin_info.get("name") {
+            Some(name) => name.as_str().unwrap(),
+            None => {
+                eprintln!("Error reading the name of an input plugin");
+                return None;
+            }
+        };
+        let ref plugin_config = plugin_info["config"];
+        let plugin = create_output_plugin(plugin_name, plugin_config, lib_list);
+        let mut pipe = OutputPipe::new(plugin, channel);
+        pipe.name = plugin_name.to_string();
+
+        if plugin_infos.len() > 1 {
+            for i in 0..plugin_infos.len() - 1 {
+                let plugin_info = plugin_infos[i].as_object().unwrap();
+                let plugin_name = match plugin_info.get("name") {
+                    Some(name) => name.as_str().unwrap(),
+                    None => {
+                        eprintln!("Error reading the name of the transform plugin");
+                        return None;
+                    }
+                };
+                let ref plugin_config = plugin_info["config"];
+                let plugin = create_transform_plugin(plugin_name, plugin_config, lib_list);
+                pipe.transformations.push(plugin);
+            }
+        }
+
+        return Some(pipe);
     }
 
     None
@@ -418,10 +517,8 @@ impl OutputThread {
     }
 }
 
-
-
 impl InputPipe {
-    fn new(input: Box<PluginInputTrait>, channel: Sender<InputEvent>) -> InputPipe {
+    fn new(input: Box<dyn PluginInputTrait>, channel: Sender<InputEvent>) -> InputPipe {
         InputPipe {
             priority: 0,
             //handle: None,
@@ -434,7 +531,7 @@ impl InputPipe {
 }
 
 impl OutputPipe {
-    fn new(output: Box<PluginOutputTrait>, channel: Receiver<Arc<RgbData>>) -> OutputPipe {
+    fn new(output: Box<dyn PluginOutputTrait>, channel: Receiver<Arc<TraitData>>) -> OutputPipe {
         OutputPipe {
             //handle: None,
             name: String::new(),

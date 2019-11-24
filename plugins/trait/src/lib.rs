@@ -2,16 +2,22 @@
 use std::sync::Arc;
 use std::thread;
 use std::thread::ThreadId;
+use std::fmt;
 
-pub type RgbData = Vec<RGB>;
+use std::collections::HashMap;
+
+pub struct TraitData {
+    pub rgb: Vec<RGB>,
+    pub meta: HashMap<String, String>,
+}
 
 pub struct InputEvent {
     pub thread_id: ThreadId,
-    pub data: Arc<RgbData>,
+    pub data: Arc<TraitData>,
 }
 
 impl InputEvent {
-    pub fn new(data: Arc<RgbData>) -> InputEvent {
+    pub fn new(data: Arc<TraitData>) -> InputEvent {
         InputEvent {
             thread_id: thread::current().id(),
             data,
@@ -33,21 +39,26 @@ pub struct RGB {
 }
 
 pub trait PluginInputTrait: Send {
-    fn get(&mut self) -> Option<RgbData>;
+    fn init(&mut self) -> bool;
+    fn get(&mut self) -> Option<TraitData>;
 }
 
 pub trait PluginOutputTrait: Send {
-    fn send(&self, data: &RgbData) -> bool;
+    fn send(&self, data: &TraitData) -> bool;
 }
 
 pub trait PluginTransformTrait: Send {
-    fn transform(&self, data: &RgbData) -> RgbData;
+    fn transform(&self, data: &TraitData) -> TraitData;
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+impl fmt::Display for RGB {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "({},{},{})",
+            self.r,
+            self.g,
+            self.b
+        )
     }
 }

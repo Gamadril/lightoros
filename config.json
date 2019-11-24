@@ -1,28 +1,50 @@
 {
     "max_input_inactivity_period": 1000,
     "plugins": {
-        "input": [{
-            "name": "FilesystemInputTPM2",
-            "config": {
-                "files": [
-                    "stripe.out"
-                ],
-                "repeat": false,
-                "delay_frame": 100,
-                "delay_file": 5000
-            },
-            "priority": 1
-        }],
-        "output": [{
-            "name": "SerialOutputTPM2",
-            "config": {
-                "port": "/dev/tty.usbmodem14101"
-            }
-        }, {
-            "name": "SerialOutputTPM2",
-            "config": {
-                "port": "/dev/tty.usbmodem14201"
-            }
-        }]
+        "input": [
+            [
+                {
+                    "name": "OsxScreenGrabberInput",
+                    "config": {
+                        "screen_index": 0,
+                        "delay_frame": 50
+                    },
+                    "priority": 1
+                },
+                {
+                    "name": "ResizeImageTransform",
+                    "config": {
+                        "width": 22,
+                        "height": 14
+                    }
+                },
+                {
+                    "name": "CropImageTransform",
+                    "config": {
+                        "left": 0,
+                        "right": 0,
+                        "top": 2,
+                        "bottom": 0
+                    }
+                }
+            ]
+        ],
+        "output": [
+            [
+                {
+                    "name": "ConvertRectangleTransform",
+                    "config": {
+                        "drop_corners": true
+                    }
+                },
+                {
+                    "name": "NetUdpOutputTPM2",
+                    "config": {
+                        "ip": "127.0.0.1",
+                        "port": 65506
+                    }
+                }
+            ]
+        ]
     }
 }

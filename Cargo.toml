@@ -1,6 +1,11 @@
 [workspace]
 members = [
     "core",
+    "plugins/input/grabber/screen/osx",
     "plugins/input/filesystem/tpm2",
     "plugins/output/serial/tpm2",
+    "plugins/output/net/udp/tpm2",
+    "plugins/transform/resize/image",
+    "plugins/transform/crop/image",
+    "plugins/transform/convert/rectangle"
 ]

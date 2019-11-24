@@ -1,39 +1,48 @@
 use serde::Deserialize;
 
-use std::io::prelude::*;
+use std::net;
 use std::ops::Deref;
 
 use lightoros_plugin::{PluginInfo, PluginOutputTrait, TraitData};
 
 #[derive(Deserialize, Debug)]
 struct Config {
-    port: String,
+    ip: String,
+    port: u16,
 }
 
-struct SerialTpm2Output {
-    config: Config,
+struct NetUdpTpm2Output {
+    address: net::SocketAddr,
 }
 
-impl SerialTpm2Output {
-    fn new(config: &serde_json::Value) -> SerialTpm2Output {
+impl NetUdpTpm2Output {
+    fn new(config: &serde_json::Value) -> NetUdpTpm2Output {
         let cfg: serde_json::Value = config.clone();
-        let config = match serde_json::from_value(cfg) {
+        let config: Config = match serde_json::from_value(cfg) {
             Ok(config) => config,
             Err(err) => {
                 panic!("Error deserializing configuration: {}", err);
             }
         };
 
-        SerialTpm2Output { config: config }
+        let addr_str = format!("{}:{}", config.ip, config.port);
+        let address = match addr_str.parse::<net::SocketAddr>() {
+            Ok(address) => address,
+            Err(err) => {
+                panic!("Error parsing IP address: {}", err);
+            }
+        };
+
+        NetUdpTpm2Output { address: address }
     }
 }
 
-impl PluginOutputTrait for SerialTpm2Output {
+impl PluginOutputTrait for NetUdpTpm2Output {
     fn send(&self, data: &TraitData) -> bool {
-        let mut serial = match serial::open(&self.config.port) {
-            Ok(s) => s,
+        let socket = match net::UdpSocket::bind("0.0.0.0:0") {
+            Ok(socket) => socket,
             Err(err) => {
-                eprintln!("Couldn't open serial port '{}': {}", self.config.port, err);
+                eprintln!("Error creating UDP Socket: {}", err);
                 return false;
             }
         };
@@ -54,13 +63,9 @@ impl PluginOutputTrait for SerialTpm2Output {
         }
         out.push(0x36);
 
-        let result = serial.write(&out);
+        let result = socket.send_to(&out, self.address);
         if result.is_err() {
-            eprintln!(
-                "Couldn't write to serial port '{}': {}",
-                self.config.port,
-                result.err().unwrap()
-            );
+            eprintln!("Error sending UDP message: {}", result.err().unwrap());
             return false;
         }
         true
@@ -69,7 +74,7 @@ impl PluginOutputTrait for SerialTpm2Output {
 
 #[no_mangle]
 pub fn create(config: &serde_json::Value) -> Box<dyn PluginOutputTrait> {
-    let plugin = SerialTpm2Output::new(config);
+    let plugin = NetUdpTpm2Output::new(config);
     Box::new(plugin)
 }
 
@@ -77,7 +82,7 @@ pub fn create(config: &serde_json::Value) -> Box<dyn PluginOutputTrait> {
 pub fn info() -> PluginInfo {
     PluginInfo {
         api_version: 1,
-        name: "SerialOutputTPM2",
+        name: "NetUdpOutputTPM2",
         filename: env!("CARGO_PKG_NAME"),
     }
 }

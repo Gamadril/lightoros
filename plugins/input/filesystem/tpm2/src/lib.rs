@@ -1,12 +1,13 @@
-use std::time::Duration;
-use std::thread;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
+use std::thread;
+use std::time::Duration;
+use std::collections::HashMap;
 
-use lightoros_plugin::{PluginInfo, PluginInputTrait, RgbData, RGB};
+use lightoros_plugin::{PluginInfo, PluginInputTrait, RGB, TraitData};
 
-use serde::{Deserialize};
+use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 struct Config {
@@ -40,9 +41,11 @@ impl FilesystemInput {
     }
 }
 
-
 impl PluginInputTrait for FilesystemInput {
-    fn get(&mut self) -> Option<RgbData> {
+    fn init(&mut self) -> bool {
+        true
+    }
+    fn get(&mut self) -> Option<TraitData> {
         if self.config.files.len() == 0 {
             eprintln!("File list empty");
             return None;
@@ -63,8 +66,8 @@ impl PluginInputTrait for FilesystemInput {
             }
         };
 
-        let mut data: Vec<u8> = Vec::new();
-        match file.read_to_end(&mut data) {
+        let mut data_in: Vec<u8> = Vec::new();
+        match file.read_to_end(&mut data_in) {
             Err(error) => {
                 eprintln!("Error reading file '{}': {}", current_file, error);
                 return None;
@@ -73,30 +76,29 @@ impl PluginInputTrait for FilesystemInput {
         }
 
         let mut index = self.frame_offset;
-        if data[index] != 0xC9 || data[index + 1] != 0xDA {
+        if data_in[index] != 0xC9 || data_in[index + 1] != 0xDA {
             panic!("error: not tpm2 file - start missing");
         }
 
-        let size: u16 = (data[index + 2] as u16) << 8 | data[index + 3] as u16;
-        let mut out: RgbData = Vec::with_capacity(size as usize / 3);
+        let size: u16 = (data_in[index + 2] as u16) << 8 | data_in[index + 3] as u16;
+        let mut data_out: Vec<RGB> = Vec::with_capacity(size as usize / 3);
         index = index + 4;
         for _ in 0..(size / 3) {
-            out.push(RGB {
-                r: data[index],
-                g: data[index + 1],
-                b: data[index + 2],
+            data_out.push(RGB {
+                r: data_in[index],
+                g: data_in[index + 1],
+                b: data_in[index + 2],
             });
             index = index + 3;
         }
 
-        if data[index] != 0x36 {
+        if data_in[index] != 0x36 {
             panic!("error: not tpm2 file - frame end missing");
         }
 
         index += 1;
 
-        if index == data.len() {
-            println!("Data end reached");
+        if index == data_in.len() {
             self.frame_offset = 0;
             self.file_index = self.file_index + 1;
         } else {
@@ -104,12 +106,16 @@ impl PluginInputTrait for FilesystemInput {
             thread::sleep(Duration::from_millis(self.config.delay_frame));
         }
 
-        Some(out)
+        let result: TraitData = TraitData {
+            rgb: data_out,
+            meta: HashMap::new(),
+        }; 
+        Some(result)
     }
 }
 
 #[no_mangle]
-pub fn create(config: &serde_json::Value) -> Box<PluginInputTrait> {
+pub fn create(config: &serde_json::Value) -> Box<dyn PluginInputTrait> {
     let plugin = FilesystemInput::new(config);
     Box::new(plugin)
 }
