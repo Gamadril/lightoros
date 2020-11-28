@@ -1,0 +1,15 @@
+===== MacOS Screen Grabber
+Kind:: `OsxScreenGrabberInput`
+Config::
+[source]
+--
+{
+    screen_index: integer,
+    delay_frame: integer
+}
+--
+Description::
+Gets its screen data from the MacOS screen/display.
+If you have several displays connected to your mac, provide the screen that should be grabbed using `screen_index` config parameter.
+The `delay_frame` parameter configures the time to wait before grabbing the next frame.
+Too small values may directyl affect the CPU usage.

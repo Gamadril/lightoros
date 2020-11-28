@@ -1,0 +1,12 @@
+===== Resize Image
+Kind:: `ResizeImageTransform`
+Config::
+[source]
+--
+{
+    width: integer,
+    height: integer,
+}
+--
+Description::
+Resizes the image represented by the RGB data from the input to the resolution provided in the config values.

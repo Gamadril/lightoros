@@ -1,0 +1,15 @@
+===== Framebuffer Grabber
+Kind:: `FramebufferScreenGrabberInput`
+Config::
+[source]
+--
+{
+    path: string,
+    delay_frame: integer
+}
+--
+Description::
+Gets its screen data from a linux framebuffer.
+The `path` parameter provides the path to the framebuffer device (e.g. `/dev/fb0`).
+The `delay_frame` parameter configures the time to wait before grabbing the next frame.
+Too small values may directyl affect the CPU usage.

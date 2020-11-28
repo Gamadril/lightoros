@@ -1,0 +1,11 @@
+===== Serial TPM2 
+Kind:: `SerialOutputTPM2`
+Config::
+[source]
+--
+{
+    port: string
+}
+--
+Description::
+Sends RGB data over serial port using the TPM2 protocol.

@@ -5,9 +5,12 @@ use std::thread;
 use std::time::Duration;
 use std::collections::HashMap;
 
-use lightoros_plugin::{PluginInfo, PluginInputTrait, RGB, TraitData};
+use lightoros_plugin_base::*;
+use lightoros_plugin_base::input::{PluginInputTrait, CreateInputPluginResult};
 
 use serde::Deserialize;
+
+const NAME: &str = "FilesystemInputTPM2";
 
 #[derive(Deserialize, Debug)]
 struct Config {
@@ -20,35 +23,37 @@ struct Config {
 struct FilesystemInput {
     config: Config,
     frame_offset: usize,
-    file_index: usize,
+    file_index: usize
 }
 
 impl FilesystemInput {
-    fn new(config: &serde_json::Value) -> FilesystemInput {
-        let cfg = config.clone();
-        let config = match serde_json::from_value(cfg) {
-            Ok(config) => config,
-            Err(err) => {
-                panic!("Error deserializing configuration: {}", err);
-            }
-        };
+    fn create(config: &serde_json::Value) -> CreateInputPluginResult {
+        let config = plugin_config_or_return!(config.clone());
 
-        FilesystemInput {
-            config: config,
+        let plugin = FilesystemInput {
+            config,
             frame_offset: 0,
             file_index: 0,
-        }
+        };
+
+        Ok(Box::new(plugin))
+    }
+}
+
+impl std::fmt::Display for FilesystemInput {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        NAME.fmt(f)
     }
 }
 
 impl PluginInputTrait for FilesystemInput {
-    fn init(&mut self) -> bool {
-        true
+    fn init(&mut self) -> PluginResult<()> {
+        Ok(())
     }
-    fn get(&mut self) -> Option<TraitData> {
+
+    fn get(&mut self) -> PluginResult<TraitData> {
         if self.config.files.len() == 0 {
-            eprintln!("File list empty");
-            return None;
+            return plugin_err!("File list empty");
         }
 
         if self.file_index == self.config.files.len() {
@@ -61,23 +66,21 @@ impl PluginInputTrait for FilesystemInput {
         let mut file = match File::open(&path) {
             Ok(file) => file,
             Err(error) => {
-                eprintln!("Error opening file '{}': {}", current_file, error);
-                return None;
+                return plugin_err!("Error opening file '{}': {}", current_file, error);
             }
         };
 
         let mut data_in: Vec<u8> = Vec::new();
         match file.read_to_end(&mut data_in) {
             Err(error) => {
-                eprintln!("Error reading file '{}': {}", current_file, error);
-                return None;
+                return plugin_err!("Error reading file '{}': {}", current_file, error);
             }
             Ok(_) => {}
         }
 
         let mut index = self.frame_offset;
         if data_in[index] != 0xC9 || data_in[index + 1] != 0xDA {
-            panic!("error: not tpm2 file - start missing");
+            return plugin_err!("Error: '{}' is not a tpm2 file - start marker missing.", current_file);
         }
 
         let size: u16 = (data_in[index + 2] as u16) << 8 | data_in[index + 3] as u16;
@@ -93,7 +96,7 @@ impl PluginInputTrait for FilesystemInput {
         }
 
         if data_in[index] != 0x36 {
-            panic!("error: not tpm2 file - frame end missing");
+            return plugin_err!("Error: '{}' is not a tpm2 file - frame end marker missing.", current_file);
         }
 
         index += 1;
@@ -110,21 +113,16 @@ impl PluginInputTrait for FilesystemInput {
             rgb: data_out,
             meta: HashMap::new(),
         }; 
-        Some(result)
+        Ok(result)
     }
 }
 
 #[no_mangle]
-pub fn create(config: &serde_json::Value) -> Box<dyn PluginInputTrait> {
-    let plugin = FilesystemInput::new(config);
-    Box::new(plugin)
+pub fn create(config: &serde_json::Value) -> CreateInputPluginResult {
+    FilesystemInput::create(config)
 }
 
 #[no_mangle]
 pub fn info() -> PluginInfo {
-    PluginInfo {
-        api_version: 1,
-        name: "FilesystemInputTPM2",
-        filename: env!("CARGO_PKG_NAME"),
-    }
+    plugin_info!(1, NAME, PluginKind::Input)
 }

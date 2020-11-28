@@ -1,6 +1,9 @@
-use lightoros_plugin::{PluginInfo, PluginTransformTrait, TraitData, RGB};
+use lightoros_plugin_base::transform::{CreateTransformPluginResult, PluginTransformTrait};
+use lightoros_plugin_base::*;
 use serde::Deserialize;
 use std::collections::HashMap;
+
+const NAME: &str = "ResizeImageTransform";
 
 #[derive(Deserialize, Debug)]
 struct Config {
@@ -12,44 +15,30 @@ struct ResizeImageTransform {
     config: Config,
 }
 
-impl ResizeImageTransform {
-    fn new(config: &serde_json::Value) -> ResizeImageTransform {
-        let cfg: serde_json::Value = config.clone();
-        let config = match serde_json::from_value(cfg) {
-            Ok(config) => config,
-            Err(err) => {
-                panic!("Error deserializing configuration: {}", err);
-            }
-        };
+impl std::fmt::Display for ResizeImageTransform {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        NAME.fmt(f)
+    }
+}
 
-        ResizeImageTransform { config: config }
+impl ResizeImageTransform {
+    fn create(config: &serde_json::Value) -> CreateTransformPluginResult {
+        let config = plugin_config_or_return!(config.clone());
+
+        let plugin = ResizeImageTransform { config };
+        Ok(Box::new(plugin))
     }
 }
 
 impl PluginTransformTrait for ResizeImageTransform {
-    fn transform(&self, data: &TraitData) -> TraitData {
+    fn transform(&self, data: &TraitData) -> PluginResult<TraitData> {
         let rgb_data = &data.rgb;
         let meta: &HashMap<String, String> = &data.meta;
 
-        let width_str: &String = match meta.get("width") {
-            Some(value) => value,
-            _ => panic!("Missing source image width meta parameter"),
-        };
-        let src_width = match width_str.parse::<usize>() {
-            Ok(number) => number,
-            _ => panic!("Cannot parse width meta parameter"),
-        };
+        let src_width: usize = get_meta_value(meta, "width")?;
+        let src_height: usize = get_meta_value(meta, "height")?;
 
-        let height_str: &String = match meta.get("height") {
-            Some(value) => value,
-            _ => panic!("Missing source image height meta parameter"),
-        };
-        let src_height = match height_str.parse::<usize>() {
-            Ok(number) => number,
-            _ => panic!("Cannot parse height meta parameter"),
-        };
-
-        // resize using nearest neighbor
+        // resize using nearest neighbour
         let width_ratio: f32 = src_width as f32 / self.config.width as f32;
         let height_ratio: f32 = src_height as f32 / self.config.height as f32;
 
@@ -69,31 +58,21 @@ impl PluginTransformTrait for ResizeImageTransform {
             }
         }
 
-        let result = TraitData {
-            rgb: data_out,
-            meta: [
-                ("width".to_string(), self.config.width.to_string()),
-                ("height".to_string(), self.config.height.to_string()),
-            ]
-            .iter()
-            .cloned()
-            .collect(),
-        };
-        result
+        let result = plugin_data!(data_out, {
+            "width" => self.config.width,
+            "height" => self.config.height,
+        });
+
+        Ok(result)
     }
 }
 
 #[no_mangle]
-pub fn create(config: &serde_json::Value) -> Box<dyn PluginTransformTrait> {
-    let plugin = ResizeImageTransform::new(config);
-    Box::new(plugin)
+pub fn create(config: &serde_json::Value) -> CreateTransformPluginResult {
+    ResizeImageTransform::create(config)
 }
 
 #[no_mangle]
 pub fn info() -> PluginInfo {
-    PluginInfo {
-        api_version: 1,
-        name: "ResizeImageTransform",
-        filename: env!("CARGO_PKG_NAME"),
-    }
+    plugin_info!(1, NAME, PluginKind::Transform)
 }

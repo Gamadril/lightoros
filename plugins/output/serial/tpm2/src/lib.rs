@@ -3,7 +3,10 @@ use serde::Deserialize;
 use std::io::prelude::*;
 use std::ops::Deref;
 
-use lightoros_plugin::{PluginInfo, PluginOutputTrait, TraitData};
+use lightoros_plugin_base::*;
+use lightoros_plugin_base::output::{PluginOutputTrait, CreateOutputPluginResult};
+
+const NAME: &str = "SerialOutputTPM2";
 
 #[derive(Deserialize, Debug)]
 struct Config {
@@ -14,27 +17,36 @@ struct SerialTpm2Output {
     config: Config,
 }
 
-impl SerialTpm2Output {
-    fn new(config: &serde_json::Value) -> SerialTpm2Output {
-        let cfg: serde_json::Value = config.clone();
-        let config = match serde_json::from_value(cfg) {
-            Ok(config) => config,
-            Err(err) => {
-                panic!("Error deserializing configuration: {}", err);
-            }
-        };
+impl std::fmt::Display for SerialTpm2Output {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        NAME.fmt(f)
+    }
+}
 
-        SerialTpm2Output { config: config }
+impl SerialTpm2Output {
+    fn create(config: &serde_json::Value) -> CreateOutputPluginResult {
+        let config = plugin_config_or_return!(config.clone());
+
+        let plugin = SerialTpm2Output { config };
+
+        Ok(Box::new(plugin))
     }
 }
 
 impl PluginOutputTrait for SerialTpm2Output {
-    fn send(&self, data: &TraitData) -> bool {
+    fn init(&mut self) -> PluginResult<()> {
+        Ok(())
+    }
+
+    fn send(&self, data: &TraitData) -> PluginResult<()> {
         let mut serial = match serial::open(&self.config.port) {
-            Ok(s) => s,
+            Ok(serial) => serial,
             Err(err) => {
-                eprintln!("Couldn't open serial port '{}': {}", self.config.port, err);
-                return false;
+                return plugin_err!(
+                    "Could not open serial port '{}': {}",
+                    self.config.port,
+                    err
+                )
             }
         };
 
@@ -56,28 +68,22 @@ impl PluginOutputTrait for SerialTpm2Output {
 
         let result = serial.write(&out);
         if result.is_err() {
-            eprintln!(
-                "Couldn't write to serial port '{}': {}",
+            return plugin_err!(
+                "Could not write to serial port '{}': {}",
                 self.config.port,
                 result.err().unwrap()
             );
-            return false;
         }
-        true
+        Ok(())
     }
 }
 
 #[no_mangle]
-pub fn create(config: &serde_json::Value) -> Box<dyn PluginOutputTrait> {
-    let plugin = SerialTpm2Output::new(config);
-    Box::new(plugin)
+pub fn create(config: &serde_json::Value) -> CreateOutputPluginResult {
+    SerialTpm2Output::create(config)
 }
 
 #[no_mangle]
 pub fn info() -> PluginInfo {
-    PluginInfo {
-        api_version: 1,
-        name: "SerialOutputTPM2",
-        filename: env!("CARGO_PKG_NAME"),
-    }
+    plugin_info!(1, NAME, PluginKind::Output)
 }

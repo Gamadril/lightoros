@@ -2,7 +2,10 @@ use serde::Deserialize;
 
 use std::collections::HashMap;
 
-use lightoros_plugin::{PluginInfo, PluginTransformTrait, TraitData, RGB};
+use lightoros_plugin_base::transform::{CreateTransformPluginResult, PluginTransformTrait};
+use lightoros_plugin_base::*;
+
+const NAME: &str = "ConvertRectangleTransform";
 
 #[derive(Deserialize, Debug)]
 struct Config {
@@ -13,42 +16,28 @@ struct ConvertRectangleTransform {
     config: Config,
 }
 
-impl ConvertRectangleTransform {
-    fn new(config: &serde_json::Value) -> ConvertRectangleTransform {
-        let cfg: serde_json::Value = config.clone();
-        let config = match serde_json::from_value(cfg) {
-            Ok(config) => config,
-            Err(err) => {
-                panic!("Error deserializing configuration: {}", err);
-            }
-        };
+impl std::fmt::Display for ConvertRectangleTransform {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        NAME.fmt(f)
+    }
+}
 
-        ConvertRectangleTransform { config: config }
+impl ConvertRectangleTransform {
+    fn create(config: &serde_json::Value) -> CreateTransformPluginResult {
+        let config = plugin_config_or_return!(config.clone());
+
+        let plugin = ConvertRectangleTransform { config };
+        Ok(Box::new(plugin))
     }
 }
 
 impl PluginTransformTrait for ConvertRectangleTransform {
-    fn transform(&self, data: &TraitData) -> TraitData {
+    fn transform(&self, data: &TraitData) -> PluginResult<TraitData> {
         let rgb_data = &data.rgb;
         let meta: &HashMap<String, String> = &data.meta;
 
-        let width_str: &String = match meta.get("width") {
-            Some(value) => value,
-            _ => panic!("Missing source image width meta parameter"),
-        };
-        let src_width = match width_str.parse::<usize>() {
-            Ok(number) => number,
-            _ => panic!("Cannot parse width meta parameter"),
-        };
-
-        let height_str: &String = match meta.get("height") {
-            Some(value) => value,
-            _ => panic!("Missing source image height meta parameter"),
-        };
-        let src_height = match height_str.parse::<usize>() {
-            Ok(number) => number,
-            _ => panic!("Cannot parse height meta parameter"),
-        };
+        let src_width: usize = get_meta_value(meta, "width")?;
+        let src_height: usize = get_meta_value(meta, "height")?;
 
         let mut size = src_width * 2 + src_height * 2;
         if !self.config.drop_corners {
@@ -120,25 +109,17 @@ impl PluginTransformTrait for ConvertRectangleTransform {
             });
         }
 
-        let result = TraitData {
-            rgb: data_out,
-            meta: HashMap::new(),
-        };
-        result
+        let result = plugin_data!(data_out, {});
+        Ok(result)
     }
 }
 
 #[no_mangle]
-pub fn create(config: &serde_json::Value) -> Box<dyn PluginTransformTrait> {
-    let plugin = ConvertRectangleTransform::new(config);
-    Box::new(plugin)
+pub fn create(config: &serde_json::Value) -> CreateTransformPluginResult {
+    ConvertRectangleTransform::create(config)
 }
 
 #[no_mangle]
 pub fn info() -> PluginInfo {
-    PluginInfo {
-        api_version: 1,
-        name: "ConvertRectangleTransform",
-        filename: env!("CARGO_PKG_NAME"),
-    }
+    plugin_info!(1, NAME, PluginKind::Transform)
 }

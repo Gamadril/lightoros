@@ -6,6 +6,7 @@ use serde_json::json;
 fn test_get_info() {
     let plugin_info = lightoros_input_extra_lua::info();
     assert_eq!(plugin_info.name, "ExtraInputLua");
+    assert!(plugin_info.kind == lightoros_plugin::PluginKind::Input);
     assert_eq!(plugin_info.api_version, 1);
     assert_eq!(plugin_info.filename, "lightoros_input_extra_lua");
 }

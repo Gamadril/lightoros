@@ -1,0 +1,14 @@
+===== Crop Image Fixed Values
+Kind:: `CropImageFixedTransform`
+Config::
+[source]
+--
+{
+    top: integer,
+    right: integer,
+    bottom: integer,
+    left: integer
+}
+--
+Description::
+Crops an image based on the fixed config values.

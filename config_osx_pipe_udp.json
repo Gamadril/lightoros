@@ -1,0 +1,54 @@
+{
+    "max_input_inactivity_period": 1000,
+    "input": [
+        {
+            "name": "Remote Pipe Screen Grabber",
+            "priority": 1,
+            "members": [
+                {
+                    "kind": "RemoteScreenPipeGrabberInput",
+                    "config": {
+                        "path": "/Users/dwi/Projects/Privat/rust/lightoros/pipe_path"
+                    }
+                },
+                {
+                    "kind": "ResizeImageTransform",
+                    "config": {
+                        "width": 100,
+                        "height": 60
+                    }
+                },
+                {
+                    "kind": "CropImageFixedTransform",
+                    "config": {
+                        "left": 0,
+                        "right": 0,
+                        "top": 2,
+                        "bottom": 0
+                    }
+                }
+            ]
+        }
+    ],
+    "output": [
+        {
+            "name": "WLAN Player",
+            "members": [
+                {
+                    "kind": "ConvertRectangleTransform",
+                    "config": {
+                        "drop_corners": true
+                    }
+                },
+                {
+                    "kind": "NetUdpOutputTPM2",
+                    "config": {
+                        "ip": "127.0.0.1",
+                        "port": 65506,
+                        "max_packet_length": 9216
+                    }
+                }
+            ]
+        }
+    ]
+}

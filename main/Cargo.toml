@@ -1,0 +1,13 @@
+[package]
+name = "lightoros_main"
+version = "0.1.0"
+authors = ["Gamadril <gamadril.dev@gmail.com>"]
+edition = "2018"
+publish = false
+
+[dependencies]
+lightoros_engine = { path = "../engine" }
+
+[dependencies.clap]
+version = "^2.33"
+default-features = false

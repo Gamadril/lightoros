@@ -1,10 +1,12 @@
-use std::ffi::c_void;
-//use std::thread;
-//use std::time::Duration;
+#![cfg(target_os = "macos")]
 
-use lightoros_plugin::{PluginInfo, PluginInputTrait, TraitData, RGB};
+use lightoros_plugin_base::input::{CreateInputPluginResult, PluginInputTrait};
+use lightoros_plugin_base::*;
+use std::ffi::c_void;
 
 use serde::Deserialize;
+
+const NAME: &str = "OsxScreenGrabberInput";
 
 type CGError = i32;
 #[allow(non_upper_case_globals)]
@@ -20,33 +22,37 @@ type CGDisplayCount = u32;
 #[derive(Deserialize, Debug)]
 struct Config {
     screen_index: u32,
-    delay_frame: u64
+    delay_frame: u64,
 }
 
 struct OsxScreenGrabberInput {
     config: Config,
     display: CGDirectDisplayID,
+    logger: Logger,
 }
 
 impl OsxScreenGrabberInput {
-    fn new(config: &serde_json::Value) -> OsxScreenGrabberInput {
-        let cfg = config.clone();
-        let config = match serde_json::from_value(cfg) {
-            Ok(config) => config,
-            Err(err) => {
-                panic!("Error deserializing configuration: {}", err);
-            }
+    fn create(config: &serde_json::Value) -> CreateInputPluginResult {
+        let config = plugin_config_or_return!(config.clone());
+
+        let plugin = OsxScreenGrabberInput {
+            config,
+            display: unsafe { CGMainDisplayID() },
+            logger: Logger::new(NAME.to_string()),
         };
 
-        OsxScreenGrabberInput {
-            config: config,
-            display: unsafe { CGMainDisplayID() },
-        }
+        Ok(Box::new(plugin))
+    }
+}
+
+impl std::fmt::Display for OsxScreenGrabberInput {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        NAME.fmt(f)
     }
 }
 
 impl PluginInputTrait for OsxScreenGrabberInput {
-    fn init(&mut self) -> bool {
+    fn init(&mut self) -> PluginResult<()> {
         const MAX_DISPLAYS: u32 = 8;
         let mut count: CGDisplayCount = 0;
 
@@ -60,30 +66,29 @@ impl PluginInputTrait for OsxScreenGrabberInput {
         };
 
         if err != kCGErrorSuccess {
-            eprintln!("Error getting list of displays");
-            return false;
+            return plugin_err!("Error getting list of displays");
         }
 
         if self.config.screen_index > count - 1 {
-            eprintln!(
+            self.logger.error(&format!(
                 "Display with index {} is not available. Using main display.",
-                self.config.screen_index
-            );
+                self.config.screen_index,
+            ));
         } else {
             self.display = displays[self.config.screen_index as usize];
         }
-        true
+        Ok(())
     }
 
-    fn get(&mut self) -> Option<TraitData> {
+    fn get(&mut self) -> PluginResult<TraitData> {
         let mut disp_image = unsafe { CGDisplayCreateImage(self.display) };
 
         // display probably lost, use main display
         if disp_image.is_null() {
             disp_image = unsafe { CGDisplayCreateImage(CGMainDisplayID()) };
-            // no displays connected, panic
+            // no displays connected
             if disp_image.is_null() {
-                panic!("No display connected.");
+                return plugin_err!("Display not connected.");
             }
         }
 
@@ -112,33 +117,22 @@ impl PluginInputTrait for OsxScreenGrabberInput {
 
         std::thread::sleep(std::time::Duration::from_millis(self.config.delay_frame));
 
-        let result: TraitData = TraitData {
-            rgb: data_out,
-            meta: [
-                ("width".to_string(), width.to_string()),
-                ("height".to_string(), height.to_string()),
-            ]
-            .iter()
-            .cloned()
-            .collect(),
-        };
-        Some(result)
+        let result = plugin_data!(data_out, {
+            "width" => width,
+            "height" => height,
+        });
+        Ok(result)
     }
 }
 
 #[no_mangle]
-pub fn create(config: &serde_json::Value) -> Box<dyn PluginInputTrait> {
-    let plugin = OsxScreenGrabberInput::new(config);
-    Box::new(plugin)
+pub fn create(config: &serde_json::Value) -> CreateInputPluginResult {
+    OsxScreenGrabberInput::create(config)
 }
 
 #[no_mangle]
 pub fn info() -> PluginInfo {
-    PluginInfo {
-        api_version: 1,
-        name: "OsxScreenGrabberInput",
-        filename: env!("CARGO_PKG_NAME"),
-    }
+    plugin_info!(1, NAME, PluginKind::Input)
 }
 
 #[link(name = "CoreFoundation", kind = "framework")]

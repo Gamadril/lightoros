@@ -1,7 +1,7 @@
 use rlua;
 use rlua::{Function, Lua, Value, Context, FromLua};
 
-use lightoros_plugin::{PluginInfo, PluginInputTrait, RGB, TraitData};
+use lightoros_plugin::{PluginInfo, PluginInputTrait, RGB, TraitData, PluginKind};
 use std::{thread, time};
 use std::sync::mpsc;
 use std::collections::HashMap;
@@ -63,9 +63,8 @@ struct EffectEngineInput {
  * Lua scripts are executed in a separate thread since they are executed in a blocking way
 */
 impl EffectEngineInput {
-    fn new(config: &serde_json::Value) -> EffectEngineInput {
-        let cfg = config.clone();
-        let config = match serde_json::from_value(cfg) {
+    fn new(config: serde_json::Value) -> EffectEngineInput {
+        let config = match serde_json::from_value(config) {
             Ok(config) => config,
             Err(err) => {
                 panic!("Error deserializing configuration: {}", err);
@@ -182,7 +181,7 @@ impl PluginInputTrait for EffectEngineInput {
 }
 
 #[no_mangle]
-pub fn create(config: &serde_json::Value) -> Box<dyn PluginInputTrait> {
+pub fn create(config: serde_json::Value) -> Box<dyn PluginInputTrait> {
     let plugin = EffectEngineInput::new(config);
     Box::new(plugin)
 }
@@ -192,6 +191,7 @@ pub fn info() -> PluginInfo {
     PluginInfo {
         api_version: 1,
         name: "ExtraInputLua",
+        kind: PluginKind::Input,
         filename: env!("CARGO_PKG_NAME"),
     }
 }

@@ -1,0 +1,14 @@
+===== Rectangle Converter
+Kind:: `ConvertRectangleTransform`
+Config::
+[source]
+--
+{
+    drop_corners: boolean
+}
+--
+Description::
+Converts an image to a rectangle by taking only most left/right/top/bottom values.
+If `drop_corners`is set to true, the values from the four corners will not be considered.
+This plugin is mainly used for an ambilight installation around the display.
+

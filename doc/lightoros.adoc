@@ -1,0 +1,149 @@
+:plugins_dir: ../plugins
+
+= Lightoros: Flexible LED engine
+Daniel Wiese(c) aka Gamadril 2020
+v 0.1, 28.11.2020: First draft
+
+== Engine
+The lightoros engine handles messages coming from the input pipes and pass them to the output pipes.
+The connection for input data is of type N:1 - several input pipes use the same channel to send their data to the engine.
+If data is coming from several input pipes at the same time, the priority level of the pipe defines the processing order.
+The engine forwards it to output plugins.
+The engine works with RGB color order.
+An image has it's origin at the top left corner.
+
+== Pipes
+The lightoros engine works with pipes to get data from some kind of input and forwards it to other components acting as output.
+According to the functionality they are called <<Input Pipes>> and <<Output Pipes>>.
+The lightoros engine can handle several input pipes and send received data to several output pipes.
+In that case all output pipes will get the same data.
+
+=== Input Pipes
+An input pipe has exactly one input source (<<Input>>) as first member of the pipe and might have optional members for modifing data (<<Transform>>) before passing it to the engine.
+For example in most cases it makes sense to resize an image to reduce the data size before passing it to the engine.
+Each input pipe runs in its own thread.
+
+=== Output Pipes
+An output pipe has exactly one output plugin as last member of the pipe and might also have optional members for modifing data (<<Transform>>) before the output plugin consumes it.
+
+== Plugins
+The full power of the lightoros system is provided by different plugins.
+There are 3 types of plugins: <<Input>>, <<Output>> and <<Transform>>.
+Below is the list of currently available plugins.
+
+=== Input
+Input plugins are responsible for providing some usefull data.
+In most cases it's some kind of RGB data.
+Input plugins are always the first member of an input pipe.
+
+==== Filesystem
+Filesystem plugins produce their data based on file content.
+
+include::{plugins_dir}/input/filesystem/tpm2/description.adoc[]
+
+==== Grabber
+Grabber plugins create RGB data out of some video source.
+
+include::{plugins_dir}/input/grabber/remote/tcp/description.adoc[]
+
+include::{plugins_dir}/input/grabber/screen/framebuffer/description.adoc[]
+
+include::{plugins_dir}/input/grabber/screen/osx/description.adoc[]
+
+=== Output
+Output plugins are responsible for consuming processed RGB data.
+It can be visual representation with LED stripes, file or something else.
+Output plugins are always at the last place in an output pipe.
+
+==== Network
+Network plugins send the RGB data over a network.
+
+include::{plugins_dir}/output/net/udp/tpm2/description.adoc[]
+
+==== Serial Port
+Serial port plugins send the RGB dato over a serial port.
+
+include::{plugins_dir}/output/serial/tpm2/description.adoc[]
+
+=== Transform
+Transformation plugins are responsible for modifying RGB data.
+In most cases they do only one simple job and are chained together to do some complex transformation.
+For example one plugin can resize an image passing the result to the next plugin which will detect and crop black borders.
+Transform plugins are separated in groups which describe their main task.
+
+==== Convert
+Converter plugins transform RGB data from one type/presentation to another.
+
+include::{plugins_dir}/transform/convert/rectangle/description.adoc[]
+
+==== Crop
+Crop plugins modify RGB data by removing some parts of it.
+
+include::{plugins_dir}/transform/crop/image_black_border/description.adoc[]
+
+include::{plugins_dir}/transform/crop/image_fixed/description.adoc[]
+
+==== Resize
+Resize plugins modify the size of the object represented by RGB data.
+
+include::{plugins_dir}/transform/resize/image/description.adoc[]
+
+
+== For developers
+Some useful information for plugin development.
+
+=== Remote grabber
+Remote grabbers are separate application/processes running outside the lightoros engine.
+They are responsible for grabbing frames from a video source and sending them to the engine.
+There are two types of remote grabbers: `Unidirectional` and `Bidirectional`.
+Bidirectional grabbers are using a two-way communication channel.
+They not only send frame data to the engine, but also receive commands from it.
+Unidirectional grabbers are using a one-way communication channel - they can only send data to the engine.
+
+==== Protocol
+===== Frame Content
+Each data packet contains additional information about data length and the resolution of the frame.
+It starts with the data length (not packet length) followed by the width and height of the frame and the frame data itslef.
+Frame data is sent in RGB format using 24 bits per value.
+
+.Frame data packet format
+[cols="2,2,7",options="header"]
+|===
+|Block | Size | Description
+|Data length | 4 bytes | Size of the data packet 
+|Frame width | 2 bytes | Width of the screen frame
+|Frame height | 2 bytes | Height of the screen frame
+|Frame content | * | Raw frame RGB data, 1 byte per color.
+|===
+`Packet length = sizeof(Frame content) + 8`
+
+All values have Big Endian byte order.
+
+===== Size Control Command
+The engine can tell the grabber the frame resolution it should send to the engine.
+
+.Size control command packet format
+[cols="2,2,7",options="header"]
+|===
+|Block | Size | Description
+|Data length | 2 bytes | Size of the command data
+|Command | 1 byte | 0x10 for size control command
+|Frame width | 2 bytes | Width of the screen frame
+|Frame height | 2 bytes | Height of the screen frame
+|===
+
+===== Name Control Command
+The engine can tell the grabber the name of the engine.
+It might be used by the grabber to show the user the name of the connected engine.
+
+.Name control command packet format
+[cols="2,2,7",options="header"]
+|===
+|Block | Size | Description
+|Packet length | 2 bytes | Size of the command data
+|Command | 1 byte | 0x20 for name control command
+|Name | * | Name of the client UTF-8 encoded
+|===
+
+
+

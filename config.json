@@ -1,25 +1,29 @@
 {
     "max_input_inactivity_period": 1000,
-    "plugins": {
-        "input": [
-            [
+    "input": [
+        {
+            "name": "Remote Grabber",
+            "priority": 1,
+            "members": [
                 {
-                    "name": "OsxScreenGrabberInput",
+                    "kind": "RemoteScreenTcpGrabberInput",
                     "config": {
-                        "screen_index": 0,
-                        "delay_frame": 50
-                    },
-                    "priority": 1
+                        "name": "FireTV Ambilight Engine",
+                        "address": "127.0.0.1",
+                        "port": 23000,
+                        "width": 20,
+                        "height": 40
+                    }
                 },
                 {
-                    "name": "ResizeImageTransform",
+                    "kind": "ResizeImageTransform",
                     "config": {
                         "width": 22,
                         "height": 14
                     }
                 },
                 {
-                    "name": "CropImageTransform",
+                    "kind": "CropImageFixedTransform",
                     "config": {
                         "left": 0,
                         "right": 0,
@@ -28,23 +32,27 @@
                     }
                 }
             ]
-        ],
-        "output": [
-            [
+        }
+    ],
+    "output": [
+        {
+            "name": "WLAN Player",
+            "members": [
                 {
-                    "name": "ConvertRectangleTransform",
+                    "kind": "ConvertRectangleTransform",
                     "config": {
                         "drop_corners": true
                     }
                 },
                 {
-                    "name": "NetUdpOutputTPM2",
+                    "kind": "NetUdpOutputTPM2",
                     "config": {
                         "ip": "127.0.0.1",
-                        "port": 65506
+                        "port": 65506,
+                        "max_packet_length": 9216
                     }
                 }
             ]
-        ]
-    }
+        }
+    ]
 }
