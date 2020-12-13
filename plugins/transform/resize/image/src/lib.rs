@@ -47,8 +47,8 @@ impl PluginTransformTrait for ResizeImageTransform {
 
         for y in 0..self.config.height {
             for x in 0..self.config.width {
-                let px = (x as f32 * width_ratio).floor() as usize;
-                let py = (y as f32 * height_ratio).floor() as usize;
+                let px = ((x as f32 + 0.5) * width_ratio).floor() as usize;
+                let py = ((y as f32 + 0.5) * height_ratio).floor() as usize;
                 let pixel: &RGB = &rgb_data[py * src_width + px];
                 data_out.push(RGB {
                     r: pixel.r,

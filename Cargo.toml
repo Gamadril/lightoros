@@ -16,4 +16,6 @@ members = [
     "plugins/transform/crop/image_fixed",
     "plugins/transform/crop/image_black_border",
     "plugins/transform/convert/rectangle",
+    "plugins/transform/convert/shift",
+    "plugins/transform/convert/reverse",
 ]

@@ -1,9 +1,10 @@
-use lightoros_plugin_base::*;
-use lightoros_plugin_base::output::CreateOutputPluginResult;
-use serde_json::json;
 use dlopen::symbor::Library;
+use lightoros_plugin_base::output::CreateOutputPluginResult;
+use lightoros_plugin_base::*;
 use once_cell::sync::Lazy;
+use serde_json::json;
 use std::path::PathBuf;
+use std::{thread, time};
 
 static LIB_PATH: Lazy<PathBuf> = Lazy::new(test_cdylib::build_current_project);
 
@@ -17,7 +18,6 @@ fn get_info() -> PluginInfo {
     let info_func = unsafe { lib.symbol::<fn() -> PluginInfo>("info").unwrap() };
     info_func()
 }
-
 
 fn call_create(config: &serde_json::Value) -> CreateOutputPluginResult {
     let lib = load_lib();
@@ -59,5 +59,59 @@ fn test_create_with_wrong_dattype_in_config() {
         "test": true
     });
     assert!(call_create(&config).is_err());
+}
+
+#[test]
+fn test_send_all() {
+    let config = json!({
+        "ip": "127.0.0.1",
+        "port": 65506,
+        "max_packet_length": 9216,
+    });
+
+    let plugin = call_create(&config);
+    assert!(plugin.is_ok());
+    let plugin = plugin.unwrap();
+
+    let size = 20 * 2 + 16 * 2 + 4;
+    let mut out: Vec<RGB> = Vec::with_capacity(size);
+
+    for _i in 0..size {
+        out.push(RGB {
+            r: 255,
+            g: 0,
+            b: 0,
+        })
+    }
+    let data = plugin_data!(out, {});
+    plugin.send(&data).unwrap();
+
+    let three_seconds = time::Duration::from_millis(3000);
+    thread::sleep(three_seconds);
+
+    let mut out: Vec<RGB> = Vec::with_capacity(size);
+    for _i in 0..size {
+        out.push(RGB {
+            r: 0,
+            g: 255,
+            b: 0,
+        })
+    }
+    let data = plugin_data!(out, {});
+    plugin.send(&data).unwrap();
+
+    let three_seconds = time::Duration::from_millis(3000);
+    thread::sleep(three_seconds);
+
+    let mut out: Vec<RGB> = Vec::with_capacity(size);
+    for _i in 0..size {
+        out.push(RGB {
+            r: 0,
+            g: 0,
+            b: 255,
+        })
+    }
+    let data = plugin_data!(out, {});
+    plugin.send(&data).unwrap();
 }
 

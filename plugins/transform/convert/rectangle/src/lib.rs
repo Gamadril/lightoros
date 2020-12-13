@@ -9,7 +9,7 @@ const NAME: &str = "ConvertRectangleTransform";
 
 #[derive(Deserialize, Debug)]
 struct Config {
-    drop_corners: bool,
+    add_corners: bool,
 }
 
 struct ConvertRectangleTransform {
@@ -40,19 +40,21 @@ impl PluginTransformTrait for ConvertRectangleTransform {
         let src_height: usize = get_meta_value(meta, "height")?;
 
         let mut size = src_width * 2 + src_height * 2;
-        if !self.config.drop_corners {
+        if self.config.add_corners {
             size += 4;
         }
         let mut data_out: Vec<RGB> = Vec::with_capacity(size);
 
-        let mut from = if self.config.drop_corners { 1 } else { 0 };
-        let mut to = if self.config.drop_corners {
-            src_width - 1
-        } else {
-            src_width
-        };
+        if self.config.add_corners {
+            let pixel = &rgb_data[0];
+            data_out.push(RGB {
+                r: pixel.r,
+                g: pixel.g,
+                b: pixel.b,
+            });
+        }
 
-        for i in from..to {
+        for i in 0..src_width {
             let pixel = &rgb_data[i];
             data_out.push(RGB {
                 r: pixel.r,
@@ -61,14 +63,16 @@ impl PluginTransformTrait for ConvertRectangleTransform {
             });
         }
 
-        from = if self.config.drop_corners { 1 } else { 0 };
-        to = if self.config.drop_corners {
-            src_height - 1
-        } else {
-            src_height
-        };
+        if self.config.add_corners {
+            let pixel = &rgb_data[src_width - 1];
+            data_out.push(RGB {
+                r: pixel.r,
+                g: pixel.g,
+                b: pixel.b,
+            });
+        }
 
-        for i in from..to {
+        for i in 0..src_height {
             let pixel = &rgb_data[i * src_width + src_width - 1];
             data_out.push(RGB {
                 r: pixel.r,
@@ -77,14 +81,16 @@ impl PluginTransformTrait for ConvertRectangleTransform {
             });
         }
 
-        from = if self.config.drop_corners { 1 } else { 0 };
-        to = if self.config.drop_corners {
-            src_width - 1
-        } else {
-            src_width
-        };
+        if self.config.add_corners {
+            let pixel = &rgb_data[src_width * src_height - 1];
+            data_out.push(RGB {
+                r: pixel.r,
+                g: pixel.g,
+                b: pixel.b,
+            });
+        }
 
-        for i in (from..to).rev() {
+        for i in (0..src_width).rev() {
             let pixel = &rgb_data[src_width * (src_height - 1) + i];
             data_out.push(RGB {
                 r: pixel.r,
@@ -93,14 +99,16 @@ impl PluginTransformTrait for ConvertRectangleTransform {
             });
         }
 
-        from = if self.config.drop_corners { 1 } else { 0 };
-        to = if self.config.drop_corners {
-            src_height - 1
-        } else {
-            src_height
-        };
+        if self.config.add_corners {
+            let pixel = &rgb_data[src_width * (src_height - 1)];
+            data_out.push(RGB {
+                r: pixel.r,
+                g: pixel.g,
+                b: pixel.b,
+            });
+        }
 
-        for i in (from..to).rev() {
+        for i in (0..src_height).rev() {
             let pixel = &rgb_data[i * src_width];
             data_out.push(RGB {
                 r: pixel.r,

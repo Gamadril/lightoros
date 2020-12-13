@@ -1,0 +1,10 @@
+===== Reverse Converter
+Kind:: `ConvertReverseTransform`
+Config::
+[source]
+--
+--
+Description::
+Reverses the order of elements.
+This plugin is mainly used to change the direction of LED data for an ambilight installation.
+
