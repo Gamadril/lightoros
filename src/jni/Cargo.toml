@@ -1,0 +1,16 @@
+[package]
+name = "lightoros_jni"
+version = "0.1.0"
+authors = ["Gamadril <gamadril.dev@gmail.com>"]
+publish = false
+edition = "2018"
+
+[dependencies]
+jni = { version = "0.16", default-features = false }
+android_logger = "0.8"
+log = "0.4"
+lightoros_engine = { path = "../engine" }
+
+[lib]
+name = "lightoros_jni"
+crate-type = ["cdylib"]

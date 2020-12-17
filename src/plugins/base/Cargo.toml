@@ -1,0 +1,11 @@
+[package]
+name = "lightoros_plugin_base"
+version = "0.1.0"
+authors = ["Gamadril <gamadril.dev@gmail.com>"]
+publish = false
+edition = "2018"
+
+[features]
+input = []
+output = []
+transform = []

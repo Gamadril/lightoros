@@ -1,0 +1,21 @@
+[workspace]
+members = [
+    "main",
+    "engine",
+    "jni",
+    "plugins/input/grabber/remote/tcp",
+    "plugins/input/grabber/remote/unix",
+    "plugins/input/grabber/remote/pipe",
+    "plugins/input/grabber/screen/framebuffer",
+    "plugins/input/grabber/screen/osx",
+    "plugins/input/filesystem/tpm2",
+    "plugins/output/serial/tpm2",
+    "plugins/output/net/udp/tpm2",
+    "plugins/output/filesystem/pipe",
+    "plugins/transform/resize/image",
+    "plugins/transform/crop/image_fixed",
+    "plugins/transform/crop/image_black_border",
+    "plugins/transform/convert/rectangle",
+    "plugins/transform/convert/shift",
+    "plugins/transform/convert/reverse",
+]
