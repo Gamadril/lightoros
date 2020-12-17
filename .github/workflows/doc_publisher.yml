@@ -18,11 +18,11 @@ jobs:
         id: adocbuild
         uses: avattathil/asciidoctor-action@master
         with:
-          program: "asciidoctor -D doc --backend=html5 -o index.html doc/lightoros.adoc"
+          program: "asciidoctor -D doc --backend=html5 -o html/index.html doc/lightoros.adoc"
 
       - name: Deploy docs to ghpages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: ./
+          publish_dir: ./html
