@@ -1,0 +1,19 @@
+name: AsciiDoc-Publisher
+
+# Run this workflow every time a new commit pushed to your repository
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: AsciiDoc HTML generator and publisher
+    # Set the type of machine to run on
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run AsciiDoc generator
+        uses: manoelcampos/asciidoctor-ghpages-action@v2

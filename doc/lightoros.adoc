@@ -1,4 +1,4 @@
-:plugins_dir: ../plugins
+:plugins_dir: ../src/plugins
 
 = Lightoros: Flexible LED engine
 Daniel Wiese(c) aka Gamadril 2020
@@ -20,7 +20,7 @@ In that case all output pipes will get the same data.
 
 === Input Pipes
 An input pipe has exactly one input source (<<Input>>) as first member of the pipe and might have optional members for modifing data (<<Transform>>) before passing it to the engine.
-For example in most cases it makes sense to resize an image to reduce the data size before passing it to the engine.
+For example when using lightoros for an ambilight installation it makes sense to resize an image created by the screen grabber to reduce the data size before passing it to the engine.
 Each input pipe runs in its own thread.
 
 === Output Pipes
@@ -44,16 +44,25 @@ include::{plugins_dir}/input/filesystem/tpm2/description.adoc[]
 ==== Grabber
 Grabber plugins create RGB data out of some video source.
 
-include::{plugins_dir}/input/grabber/remote/tcp/description.adoc[]
-
 include::{plugins_dir}/input/grabber/screen/framebuffer/description.adoc[]
 
 include::{plugins_dir}/input/grabber/screen/osx/description.adoc[]
 
+include::{plugins_dir}/input/grabber/remote/tcp/description.adoc[]
+
+include::{plugins_dir}/input/grabber/remote/pipe/description.adoc[]
+
+include::{plugins_dir}/input/grabber/remote/unix/description.adoc[]
+
 === Output
 Output plugins are responsible for consuming processed RGB data.
-It can be visual representation with LED stripes, file or something else.
+It could be a LED stripe, a file or something else.
 Output plugins are always at the last place in an output pipe.
+
+==== File System
+File System plugins write the RGB data to file system.
+
+include::{plugins_dir}/output/filesystem/pipe/description.adoc[]
 
 ==== Network
 Network plugins send the RGB data over a network.
@@ -61,13 +70,13 @@ Network plugins send the RGB data over a network.
 include::{plugins_dir}/output/net/udp/tpm2/description.adoc[]
 
 ==== Serial Port
-Serial port plugins send the RGB dato over a serial port.
+Serial port plugins send the RGB data over a serial port.
 
 include::{plugins_dir}/output/serial/tpm2/description.adoc[]
 
 === Transform
 Transformation plugins are responsible for modifying RGB data.
-In most cases they do only one simple job and are chained together to do some complex transformation.
+In most cases they do only one simple job and are chained together to do some complex transformations.
 For example one plugin can resize an image passing the result to the next plugin which will detect and crop black borders.
 Transform plugins are separated in groups which describe their main task.
 
@@ -75,6 +84,10 @@ Transform plugins are separated in groups which describe their main task.
 Converter plugins transform RGB data from one type/presentation to another.
 
 include::{plugins_dir}/transform/convert/rectangle/description.adoc[]
+
+include::{plugins_dir}/transform/convert/reverse/description.adoc[]
+
+include::{plugins_dir}/transform/convert/shift/description.adoc[]
 
 ==== Crop
 Crop plugins modify RGB data by removing some parts of it.

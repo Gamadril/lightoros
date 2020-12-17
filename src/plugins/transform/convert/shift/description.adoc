@@ -1,0 +1,14 @@
+===== Shift Converter
+Kind:: `ConvertShiftTransform`
+Config::
+[source]
+--
+{
+    amount: integer
+}
+--
+Description::
+Handles the input data as ring buffer. All elements are shifted to the right (clockwise) by the number of positions specified by the `amount` parameter.
+If the value of `amount` is negative, elements will be shifted to the left (anti-clockwise).
+This plugin is mainly used to rotate elements in the data buffer to fit the start position of the LED stripe in an ambilight installation.
+

@@ -1,0 +1,20 @@
+===== Remote TCP Grabber
+Kind:: `RemoteScreenTcpGrabberInput`
+Config::
+[source]
+--
+{
+    client_name: string,
+    address: string,
+    port: integer,
+    width: integer,
+    height: integer
+}
+--
+Description::
+Gets its screen data from a remote grabber over network.
+The plugin acts as a TCP client and tries to connect to the remote screen grabber using `address` and `port` config parameters.
+After establishing a connection the plugin will send the `client_name` parameter to identify itself.
+The plugin also sends the parameters `width` and `height` to tell the server the resolution of the target image it would like to receive.
+This will reduce the size of transfered data over the network.
+

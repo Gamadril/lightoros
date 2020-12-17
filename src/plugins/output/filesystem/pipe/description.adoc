@@ -1,0 +1,12 @@
+===== Filesystem Pipe
+Kind:: `FilesystemPipeOutput`
+Config::
+[source]
+--
+{
+    path: string,
+}
+--
+Description::
+Writes the RGB data to file system using the `path` parameter.
+No additianal headers are added to the output.

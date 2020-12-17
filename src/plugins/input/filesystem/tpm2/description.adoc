@@ -1,0 +1,19 @@
+===== TPM2 File
+Kind:: `FilesystemInputTPM2`
+Config::
+[source]
+--
+{
+    files: array[string],
+    repeat: boolean,
+    delay_frame: number,
+    delay_file: number
+}
+--
+Description::
+Reads RGB data out of TPM2 files.
+`files` config parameter provides the list of absolute paths.
+If `repeat` is set to `true` the files will be played in a loop.
+With the `delay_frame` parameter you can specify a delay in milliseconds between the single TPM2 frames.
+`delay_file` parameter is used for a delay between the files in the list.
+
