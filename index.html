@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<meta name="author" content="Daniel Wiese(c) aka Gamadril 2020">
+<meta name="author" content="Daniel Wiese&#169; aka Gamadril 2020">
 <title>Lightoros: Flexible LED engine</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -437,14 +437,104 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 </head>
-<body class="article">
+<body class="article toc2 toc-left">
 <div id="header">
 <h1>Lightoros: Flexible LED engine</h1>
 <div class="details">
-<span id="author" class="author">Daniel Wiese(c) aka Gamadril 2020</span><br>
+<span id="author" class="author">Daniel Wiese&#169; aka Gamadril 2020</span><br>
 <span id="revnumber">version 0.1,</span>
 <span id="revdate">28.11.2020</span>
 <br><span id="revremark">First draft</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_engine">Engine</a></li>
+<li><a href="#_pipes">Pipes</a>
+<ul class="sectlevel2">
+<li><a href="#_input_pipes">Input Pipes</a></li>
+<li><a href="#_output_pipes">Output Pipes</a></li>
+</ul>
+</li>
+<li><a href="#_plugins">Plugins</a>
+<ul class="sectlevel2">
+<li><a href="#_input">Input</a>
+<ul class="sectlevel3">
+<li><a href="#_filesystem">Filesystem</a>
+<ul class="sectlevel4">
+<li><a href="#_tpm2_file">TPM2 File</a></li>
+</ul>
+</li>
+<li><a href="#_grabber">Grabber</a>
+<ul class="sectlevel4">
+<li><a href="#_framebuffer_grabber">Framebuffer Grabber</a></li>
+<li><a href="#_macos_screen_grabber">MacOS Screen Grabber</a></li>
+<li><a href="#_remote_tcp_grabber">Remote TCP Grabber</a></li>
+<li><a href="#_remote_named_pipe_grabber">Remote Named Pipe Grabber</a></li>
+<li><a href="#_remote_unix_socket_grabber">Remote Unix Socket Grabber</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_output">Output</a>
+<ul class="sectlevel3">
+<li><a href="#_file_system">File System</a>
+<ul class="sectlevel4">
+<li><a href="#_filesystem_pipe">Filesystem Pipe</a></li>
+</ul>
+</li>
+<li><a href="#_network">Network</a>
+<ul class="sectlevel4">
+<li><a href="#_udp_tpm2">UDP TPM2</a></li>
+</ul>
+</li>
+<li><a href="#_serial_port">Serial Port</a>
+<ul class="sectlevel4">
+<li><a href="#_serial_tpm2">Serial TPM2</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_transform">Transform</a>
+<ul class="sectlevel3">
+<li><a href="#_convert">Convert</a>
+<ul class="sectlevel4">
+<li><a href="#_rectangle_converter">Rectangle Converter</a></li>
+<li><a href="#_reverse_converter">Reverse Converter</a></li>
+<li><a href="#_shift_converter">Shift Converter</a></li>
+</ul>
+</li>
+<li><a href="#_crop">Crop</a>
+<ul class="sectlevel4">
+<li><a href="#_crop_image_black_border">Crop Image Black Border</a></li>
+<li><a href="#_crop_image_fixed_values">Crop Image Fixed Values</a></li>
+</ul>
+</li>
+<li><a href="#_resize">Resize</a>
+<ul class="sectlevel4">
+<li><a href="#_resize_image">Resize Image</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_for_developers">For developers</a>
+<ul class="sectlevel2">
+<li><a href="#_remote_grabber">Remote grabber</a>
+<ul class="sectlevel3">
+<li><a href="#_protocol">Protocol</a>
+<ul class="sectlevel4">
+<li><a href="#_frame_content">Frame Content</a></li>
+<li><a href="#_size_control_command">Size Control Command</a></li>
+<li><a href="#_name_control_command">Name Control Command</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 </div>
 </div>
 <div id="content">
@@ -1188,7 +1278,7 @@ It might be used by the grabber to show the user the name of the connected engin
 <div id="footer">
 <div id="footer-text">
 Version 0.1<br>
-Last updated 2020-12-17 21:32:49 UTC
+Last updated 2020-12-18 07:52:28 UTC
 </div>
 </div>
 </body>
