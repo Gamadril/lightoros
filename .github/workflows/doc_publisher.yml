@@ -4,6 +4,8 @@ name: AsciiDoc-Publisher
 on:
   push:
     branches: [ master ]
+    paths:
+    - '**.adoc'
 
 jobs:
   build:
