@@ -29,6 +29,7 @@ pub(crate) struct PluginDescription {
 
 #[derive(serde::Deserialize)]
 pub(crate) struct Config {
+    pub description: String,
     pub max_input_inactivity_period: u64,
     pub input: Vec<InputPipeDescription>,
     pub output: Vec<OutputPipeDescription>,

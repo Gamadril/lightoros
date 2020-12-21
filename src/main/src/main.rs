@@ -33,7 +33,7 @@ fn main() {
     // get config parameter and read the file content
     let cfg_path = matches.value_of("config").unwrap();
     let config_file_path = Path::new(cfg_path);
-    let content = match fs::read_to_string(&config_file_path) {
+    let config_str = match fs::read_to_string(&config_file_path) {
         Ok(text) => text,
         Err(error) => {
             eprintln!("Error reading config file '{}': {}", cfg_path, error);
@@ -51,6 +51,6 @@ fn main() {
     }
 
     let mut engine = LightorosEngine::new();
-    engine.init(content, plugin_folder).unwrap();
+    engine.init(config_str, plugin_folder).unwrap();
     engine.start();
 }
