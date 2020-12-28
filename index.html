@@ -468,6 +468,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_grabber">Grabber</a>
 <ul class="sectlevel4">
 <li><a href="#_framebuffer_grabber">Framebuffer Grabber</a></li>
+<li><a href="#_x11_grabber">X11 Grabber</a></li>
 <li><a href="#_macos_screen_grabber">MacOS Screen Grabber</a></li>
 <li><a href="#_remote_tcp_grabber">Remote TCP Grabber</a></li>
 <li><a href="#_remote_named_pipe_grabber">Remote Named Pipe Grabber</a></li>
@@ -661,6 +662,35 @@ With the <code>delay_frame</code> parameter you can specify a delay in milliseco
 <dd>
 <p>Gets its screen data from a linux framebuffer.
 The <code>path</code> parameter provides the path to the framebuffer device (e.g. <code>/dev/fb0</code>).
+The <code>delay_frame</code> parameter configures the time to wait before grabbing the next frame.
+Too small values may directyl affect the CPU usage.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_x11_grabber">X11 Grabber</h5>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Kind</dt>
+<dd>
+<p><code>X11ScreenGrabberInput</code></p>
+</dd>
+<dt class="hdlist1">Config</dt>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>{
+    delay_frame: integer
+}</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Description</dt>
+<dd>
+<p>Gets its screen data from the X11 server.
 The <code>delay_frame</code> parameter configures the time to wait before grabbing the next frame.
 Too small values may directyl affect the CPU usage.</p>
 </dd>
@@ -1278,7 +1308,7 @@ It might be used by the grabber to show the user the name of the connected engin
 <div id="footer">
 <div id="footer-text">
 Version 0.1<br>
-Last updated 2020-12-18 07:55:51 UTC
+Last updated 2020-12-28 12:49:30 UTC
 </div>
 </div>
 </body>
