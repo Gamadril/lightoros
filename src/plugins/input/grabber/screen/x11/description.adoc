@@ -1,0 +1,13 @@
+===== X11 Grabber
+Kind:: `X11ScreenGrabberInput`
+Config::
+[source]
+--
+{
+    delay_frame: integer
+}
+--
+Description::
+Gets its screen data from the X11 server.
+The `delay_frame` parameter configures the time to wait before grabbing the next frame.
+Too small values may directyl affect the CPU usage.

@@ -48,6 +48,8 @@ Grabber plugins create RGB data out of some video source.
 
 include::{plugins_dir}/input/grabber/screen/framebuffer/description.adoc[]
 
+include::{plugins_dir}/input/grabber/screen/x11/description.adoc[]
+
 include::{plugins_dir}/input/grabber/screen/osx/description.adoc[]
 
 include::{plugins_dir}/input/grabber/remote/tcp/description.adoc[]

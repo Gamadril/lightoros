@@ -43,12 +43,9 @@ fn main() {
 
     println!("Config file '{}' loaded.", cfg_path);
 
-    let plugin_folder;
-    if cfg!(debug_assertions) {
-        plugin_folder = "./target/debug".to_string();
-    } else {
-        plugin_folder = "./target/release".to_string();
-    }
+    let mut exepath = std::env::current_exe().unwrap();
+    exepath.pop();
+    let plugin_folder = exepath.into_os_string().into_string().unwrap().clone();
 
     let mut engine = LightorosEngine::new();
     engine.init(config_str, plugin_folder).unwrap();

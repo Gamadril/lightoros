@@ -1,4 +1,4 @@
-//#![cfg(target_os = "linux")]
+#![cfg(target_os = "linux")]
 
 use lightoros_plugin_base::input::{CreateInputPluginResult, PluginInputTrait};
 use lightoros_plugin_base::*;
@@ -27,7 +27,7 @@ struct FramebufferScreenGrabberInput {
 }
 
 impl FramebufferScreenGrabberInput {
-    fn create(config: serde_json::Value) -> CreateInputPluginResult {
+    fn create(config: &serde_json::Value) -> CreateInputPluginResult {
         let config = plugin_config_or_return!(config.clone());
 
         let plugin = FramebufferScreenGrabberInput {
@@ -148,7 +148,7 @@ impl PluginInputTrait for FramebufferScreenGrabberInput {
 }
 
 #[no_mangle]
-pub fn create(config: serde_json::Value) -> CreateInputPluginResult {
+pub fn create(config: &serde_json::Value) -> CreateInputPluginResult {
     FramebufferScreenGrabberInput::create(config)
 }
 

@@ -304,7 +304,10 @@ fn find_plugin_file(name: &str, folder: &str) -> Result<PathBuf, PluginError> {
             libfile_path.push(full_path.path());
 
             let lib = Library::new(libfile_path.as_path()).unwrap();
-            let get_info: Symbol<fn() -> PluginInfo> = unsafe { lib.get(b"info").unwrap() };
+            let get_info: Symbol<fn() -> PluginInfo> = match unsafe { lib.get(b"info") } {
+                Ok(info) => info,
+                Err(_) => continue,
+            };
             let info = get_info();
 
             if info.name == name {

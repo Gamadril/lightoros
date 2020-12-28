@@ -8,6 +8,7 @@ members = [
     "plugins/input/grabber/remote/pipe",
     "plugins/input/grabber/screen/framebuffer",
     "plugins/input/grabber/screen/osx",
+    "plugins/input/grabber/screen/x11",
     "plugins/input/filesystem/tpm2",
     "plugins/output/serial/tpm2",
     "plugins/output/net/udp/tpm2",

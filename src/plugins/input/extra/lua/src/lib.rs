@@ -181,7 +181,7 @@ impl PluginInputTrait for EffectEngineInput {
 }
 
 #[no_mangle]
-pub fn create(config: serde_json::Value) -> Box<dyn PluginInputTrait> {
+pub fn create(config: &serde_json::Value) -> Box<dyn PluginInputTrait> {
     let plugin = EffectEngineInput::new(config);
     Box::new(plugin)
 }
