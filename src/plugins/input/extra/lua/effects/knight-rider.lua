@@ -6,13 +6,15 @@ speed = math.max(0.0001, speed)
 fadeFactor = math.max(0.0, math.min(fadeFactor, 1.0))
 
 -- Initialize the led data
-local width = 25
-local imageData = {} --bytearray(width * (0,0,0))
-imageData[1] = color
-for i=2, width do
-    imageData[i] = {0,0,0}
+local width = screen.width
+local height = screen.height
+local imageData = {}
+for x = 1, width do
+	imageData[x] = {}
+	for y = 1, height do
+		imageData[x][y] = { 0, 0, 0 }
+	end
 end
-
 
 -- Calculate the sleep time and rotation increment
 local increment = 1
@@ -25,8 +27,8 @@ end
 --Start the write data loop
 local position = 0
 local direction = 1
-while not api:abort() do 
-	api:setImage(width, 1, imageData)
+while not api.isStopRequested() do 
+	api.setScreen(imageData)
 
 	-- Move data into next state
 	for i=1, increment do
@@ -41,17 +43,21 @@ while not api:abort() do
 
 		-- Fade the old data
 		for j=1, width do
-			imageData[j] = {
-                math.floor(fadeFactor * imageData[j][1]),
-                math.floor(fadeFactor * imageData[j][2]),
-                math.floor(fadeFactor * imageData[j][3])
-            }
+			for y = 1, height do
+				imageData[j][y] = {
+					math.floor(fadeFactor * imageData[j][y][1]),
+					math.floor(fadeFactor * imageData[j][y][2]),
+					math.floor(fadeFactor * imageData[j][y][3])
+				}
+			end
 		end
 
 		-- Insert new data
-		imageData[position] = color
+		for y = 1, height do
+			imageData[position][y] = color
+		end
 	end
 
 	-- Sleep for a while
-	api:sleep(sleepTime)
+	api.sleep(sleepTime)
 end

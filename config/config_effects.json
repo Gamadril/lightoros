@@ -1,0 +1,57 @@
+{
+    "description": "Effect engine test",
+    "max_input_inactivity_period": 1000,
+    "input": [
+        {
+            "name": "Effects",
+            "priority": 1,
+            "members": [
+                {
+                    "kind": "LuaExtraInput",
+                    "config": {
+                        "source_folder": "src/plugins/input/extra/lua/effects",
+                        "on_start_effect": {
+                            "name": "knight-rider",
+                            "duration": 0
+                        },
+                        "screen": {
+                            "width": 20,
+                            "height": 16
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "output": [
+        {
+            "name": "WLAN Player",
+            "members": [
+                {
+                    "kind": "ConvertRectangleTransform",
+                    "config": {
+                        "add_corners": false
+                    }
+                },
+                {
+                    "kind": "ConvertShiftTransform",
+                    "config": {
+                        "amount": -16
+                    }
+                },
+                {
+                    "kind": "ConvertReverseTransform",
+                    "config": {}
+                },
+                {
+                    "kind": "NetUdpOutputTPM2",
+                    "config": {
+                        "ip": "127.0.0.1",
+                        "port": 65506,
+                        "max_packet_length": 9216
+                    }
+                }
+            ]
+        }
+    ]
+}

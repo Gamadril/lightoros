@@ -3,6 +3,7 @@ members = [
     "main",
     "engine",
     "jni",
+    "plugins/input/extra/lua",
     "plugins/input/grabber/remote/tcp",
     "plugins/input/grabber/remote/unix",
     "plugins/input/grabber/remote/pipe",
