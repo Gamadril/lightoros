@@ -108,7 +108,11 @@ impl LuaExtraInput {
         let mut file = match File::open(&path) {
             Ok(file) => file,
             Err(error) => {
-                self.logger.error(&format!("Error opening file '{}': {}", &path.display(), error));
+                self.logger.error(&format!(
+                    "Error opening file '{}': {}",
+                    &path.display(),
+                    error
+                ));
                 return;
             }
         };
@@ -116,7 +120,11 @@ impl LuaExtraInput {
         let mut contents = String::new();
         match file.read_to_string(&mut contents) {
             Err(error) => {
-                self.logger.error(&format!("Error reading file '{}': {}", &path.display(), error));
+                self.logger.error(&format!(
+                    "Error reading file '{}': {}",
+                    &path.display(),
+                    error
+                ));
                 return;
             }
             Ok(_) => {}
@@ -136,10 +144,64 @@ impl LuaExtraInput {
                 globals.set("screen", screen).unwrap();
 
                 let color = lua_ctx.create_table().unwrap();
-                color.set(1, 255).unwrap();
-                color.set(2, 0).unwrap();
-                color.set(3, 255).unwrap();
-                args.set("color", color).unwrap();
+                let hsv2rgb = lua_ctx
+                    .create_function(|_, (hue, saturation, value): (i32, i32, i32)| {
+                        let v = value as u8;
+                        let mut red: u8 = v;
+                        let mut green: u8 = v;
+                        let mut blue: u8 = v;
+
+                        if saturation > 0 {
+                            let region = hue / 60;
+                            let remainder = (hue - (region * 60)) * 256 / 60;
+
+                            let p = ((value * (255 - saturation)) >> 8) as u8;
+                            let q = ((value * (255 - ((saturation * remainder) >> 8))) >> 8) as u8;
+                            let t = ((value * (255 - ((saturation * (255 - remainder)) >> 8))) >> 8) as u8;
+
+                            match region {
+                                0 => {
+                                    red = v;
+                                    green = t;
+                                    blue = p;
+                                }
+                                1 => {
+                                    red = q;
+                                    green = v;
+                                    blue = p;
+                                }
+                                2 => {
+                                    red = p;
+                                    green = v;
+                                    blue = t;
+                                }
+                                3 => {
+                                    red = p;
+                                    green = q;
+                                    blue = v;
+                                }
+                                4 => {
+                                    red = t;
+                                    green = p;
+                                    blue = v;
+                                }
+                                _ => {
+                                    red = v;
+                                    green = p;
+                                    blue = q;
+                                }
+                            }
+                        }
+
+                        Ok((
+                            rlua::Value::Integer(red as i64),
+                            rlua::Value::Integer(green as i64),
+                            rlua::Value::Integer(blue as i64),
+                        ))
+                    })
+                    .unwrap();
+                color.set("hsv2rgb", hsv2rgb).unwrap();
+                globals.set("color", color).unwrap();
                 globals.set("args", args).unwrap();
 
                 let core_functions: Vec<(&str, Function)> = vec![
@@ -161,7 +223,7 @@ impl LuaExtraInput {
                                 for i in 0..height {
                                     for j in 0..width {
                                         let dot = screen[j][i];
-                                        out.push( RGB {
+                                        out.push(RGB {
                                             r: dot.r,
                                             g: dot.g,
                                             b: dot.b,
@@ -194,10 +256,7 @@ impl LuaExtraInput {
                 let api = lua_ctx.create_table_from(core_functions).unwrap();
                 globals.set("api", api).unwrap();
 
-                lua_ctx
-                    .load(&contents)
-                    .exec()
-                    .unwrap();
+                lua_ctx.load(&contents).exec().unwrap();
             });
         });
     }

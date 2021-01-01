@@ -11,7 +11,7 @@
                     "config": {
                         "source_folder": "src/plugins/input/extra/lua/effects",
                         "on_start_effect": {
-                            "name": "knight-rider",
+                            "name": "rainbow",
                             "duration": 0
                         },
                         "screen": {
