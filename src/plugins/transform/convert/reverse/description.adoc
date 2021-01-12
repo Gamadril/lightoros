@@ -3,8 +3,29 @@ Kind:: `ConvertReverseTransform`
 Config::
 [source]
 --
+{
+    keep_first: boolean
+}
 --
 Description::
 Reverses the order of elements.
 This plugin is mainly used to change the direction of LED data for an ambilight installation.
+If `keep_first` is set to true, the first value of input data is kept at it's position.
+
+[.float-group]
+--
+.Output of conversion with `keep_first = false`
+image::screen_corners.png[float="left", 400]
+image::screen_reverse.png[float="left",400]
+--
+
+[.float-group]
+--
+.Output of conversion with `keep_first = true`
+image::screen_corners.png[float="left", 400]
+image::screen_reverse_fixed_first.png[float="left",400]
+--
+
+Numbers show the index of RGB values in the output data.
+
 

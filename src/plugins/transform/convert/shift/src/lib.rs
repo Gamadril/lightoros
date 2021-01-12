@@ -37,7 +37,7 @@ impl PluginTransformTrait for ConvertShiftTransform {
         let mut data_out: Vec<RGB> = Vec::with_capacity(out_size);
 
         for i in 0..out_size {
-            let idx = i as i32 + out_size as i32 + self.config.amount;
+            let idx = i as i32 + out_size as i32 - self.config.amount;
             let idx = idx as usize % out_size;
             let rgb = rgb_data[idx];
             data_out.push(rgb)

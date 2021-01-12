@@ -21,8 +21,19 @@ impl ConvertReverseTransform {
 
 impl PluginTransformTrait for ConvertReverseTransform {
     fn transform(&self, data: &TraitData) -> PluginResult<TraitData> {
-        let mut rgb_data = data.rgb.clone(); 
-        rgb_data.reverse();
+        let mut rgb_data = data.rgb.clone();
+        let mut last = rgb_data.len() - 1;
+        let mut first = 1;
+
+        while first < last {
+            let f = rgb_data[first];
+            let l = rgb_data[last];
+            rgb_data[last] = f;
+            rgb_data[first] = l;
+            first += 1;
+            last -= 1;
+        }
+
         let result = plugin_data!(rgb_data, {});
 
         Ok(result)

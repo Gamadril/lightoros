@@ -30,18 +30,20 @@
                 {
                     "kind": "ConvertRectangleTransform",
                     "config": {
-                        "add_corners": false
+                        "drop_corners": false
+                    }
+                },
+                {
+                    "kind": "ConvertReverseTransform",
+                    "config": {
+                        "keep_first": true
                     }
                 },
                 {
                     "kind": "ConvertShiftTransform",
                     "config": {
-                        "amount": -16
+                        "amount": -15
                     }
-                },
-                {
-                    "kind": "ConvertReverseTransform",
-                    "config": { }
                 },
                 {
                     "kind": "NetUdpOutputTPM2",

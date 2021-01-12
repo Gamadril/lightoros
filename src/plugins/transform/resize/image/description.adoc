@@ -10,3 +10,8 @@ Config::
 --
 Description::
 Resizes the image represented by the RGB data from the input to the resolution provided in the config values.
+
+.Resized image
+image::screen_resize.png[Resized,400]
+
+Numbers show the index of RGB values in the output data.

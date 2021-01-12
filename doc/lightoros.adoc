@@ -1,10 +1,13 @@
 :plugins_dir: ../src/plugins
+:imagesdir: ./images
+:!figure-caption:
 
 = Lightoros: Flexible LED engine
 Daniel Wiese(C) aka Gamadril 2020
 v 0.1, 28.11.2020: First draft
 :toc: left
 :toclevels: 4
+
 
 == Engine
 The lightoros engine handles messages coming from the input pipes and pass them to the output pipes.

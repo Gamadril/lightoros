@@ -12,3 +12,19 @@ Handles the input data as ring buffer. All elements are shifted to the right (cl
 If the value of `amount` is negative, elements will be shifted to the left (anti-clockwise).
 This plugin is mainly used to rotate elements in the data buffer to fit the start position of the LED stripe in an ambilight installation.
 
+[.float-group]
+--
+.Output of conversion with `amount = 2`
+image::screen_corners.png[float="left", 400]
+image::screen_shift_2.png[float="left", 400]
+--
+
+[.float-group]
+--
+.Output of conversion with `amount = -2`
+image::screen_corners.png[float="left", 400]
+image::screen_shift_-2.png[float="left", 400]
+--
+
+Numbers show the index of RGB values in the output data.
+

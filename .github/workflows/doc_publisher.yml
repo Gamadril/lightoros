@@ -22,6 +22,10 @@ jobs:
         with:
           program: "asciidoctor -D doc --backend=html5 -o html/index.html doc/lightoros.adoc"
 
+      - name: Move images
+        run: |
+          mv ./doc/images .doc/html
+
       - name: Deploy docs to ghpages
         uses: peaceiris/actions-gh-pages@v3
         with:
