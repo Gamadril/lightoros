@@ -16,14 +16,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Copy images
-        run: cp -r doc/images doc/html
-
       - name: Get build container
         id: adocbuild
         uses: avattathil/asciidoctor-action@master
         with:
-          program: "asciidoctor -D doc --backend=html5 -o html/index.html doc/lightoros.adoc"
+          program: "asciidoctor -D doc --backend=html5 -o html/index.html doc/lightoros.adoc && mv doc/images doc/html/"
 
       - name: Deploy docs to ghpages
         uses: peaceiris/actions-gh-pages@v3
