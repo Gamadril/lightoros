@@ -8,7 +8,6 @@ v 0.1, 28.11.2020: First draft
 :toc: left
 :toclevels: 4
 
-
 == Engine
 The lightoros engine handles messages coming from the input pipes and pass them to the output pipes.
 The connection for input data is of type N:1 - several input pipes use the same channel to send their data to the engine.
