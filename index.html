@@ -993,37 +993,37 @@ This plugin is mainly used for an ambilight installation around/behind a display
 </dl>
 </div>
 <div class="openblock float-group">
-<div class="content">
-<div class="imageblock left">
-<div class="content">
-<img src="./images/screen_resize.png" alt="screen resize" width="400">
-</div>
 <div class="title">Output of conversion with <code>drop_corners = false</code></div>
+<div class="content">
+<div class="imageblock left">
+<div class="content">
+<img src="./images/screen_resize.png" alt="screen resize" width="300">
+</div>
 </div>
 <div class="imageblock left">
 <div class="content">
-<img src="./images/screen_corners.png" alt="screen corners" width="400">
+<img src="./images/screen_corners.png" alt="screen corners" width="300">
 </div>
 </div>
 </div>
 </div>
 <div class="openblock float-group">
-<div class="content">
-<div class="imageblock left">
-<div class="content">
-<img src="./images/screen_resize.png" alt="screen resize" width="400">
-</div>
 <div class="title">Output of conversion with <code>drop_corners = true</code></div>
+<div class="content">
+<div class="imageblock left">
+<div class="content">
+<img src="./images/screen_resize.png" alt="screen resize" width="300">
+</div>
 </div>
 <div class="imageblock left">
 <div class="content">
-<img src="./images/screen_drop_corners.png" alt="screen drop corners" width="400">
+<img src="./images/screen_drop_corners.png" alt="screen drop corners" width="300">
 </div>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Numbers show the index of RGB values in the output data.</p>
+<p>Numbers show the indices of RGB values before and after the transformation.</p>
 </div>
 </div>
 <div class="sect4">
@@ -1055,37 +1055,49 @@ If <code>keep_first</code> is set to true, the first value of input data is kept
 </dl>
 </div>
 <div class="openblock float-group">
-<div class="content">
-<div class="imageblock left">
-<div class="content">
-<img src="./images/screen_corners.png" alt="screen corners" width="400">
-</div>
 <div class="title">Output of conversion with <code>keep_first = false</code></div>
+<div class="content">
+<div class="imageblock left">
+<div class="content">
+<img src="./images/screen_corners.png" alt="screen corners" width="300">
+</div>
 </div>
 <div class="imageblock left">
 <div class="content">
-<img src="./images/screen_reverse.png" alt="screen reverse" width="400">
+<img src="./images/screen_reverse_old_indices.png" alt="screen reverse old indices" width="300">
+</div>
+</div>
+<div class="imageblock left">
+<div class="content">
+<img src="./images/screen_reverse_new_indices.png" alt="screen reverse new indices" width="300">
 </div>
 </div>
 </div>
 </div>
 <div class="openblock float-group">
-<div class="content">
-<div class="imageblock left">
-<div class="content">
-<img src="./images/screen_corners.png" alt="screen corners" width="400">
-</div>
 <div class="title">Output of conversion with <code>keep_first = true</code></div>
+<div class="content">
+<div class="imageblock left">
+<div class="content">
+<img src="./images/screen_corners.png" alt="screen corners" width="300">
+</div>
 </div>
 <div class="imageblock left">
 <div class="content">
-<img src="./images/screen_reverse_fixed_first.png" alt="screen reverse fixed first" width="400">
+<img src="./images/screen_reverse_fixed_first_old_indices.png" alt="screen reverse fixed first old indices" width="300">
+</div>
+</div>
+<div class="imageblock left">
+<div class="content">
+<img src="./images/screen_reverse_fixed_first_new_indices.png" alt="screen reverse fixed first new indices" width="300">
 </div>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Numbers show the index of RGB values in the output data.</p>
+<p>On the left image the numbers show the indices of input RGB values before the transformation.
+In the middle the indices belong to the elements transformed to make clear how the transformation is applied.
+Last image shows the indices of the output data after the transformation.</p>
 </div>
 </div>
 <div class="sect4">
@@ -1117,37 +1129,49 @@ This plugin is mainly used to rotate elements in the data buffer to fit the star
 </dl>
 </div>
 <div class="openblock float-group">
-<div class="content">
-<div class="imageblock left">
-<div class="content">
-<img src="./images/screen_corners.png" alt="screen corners" width="400">
-</div>
 <div class="title">Output of conversion with <code>amount = 2</code></div>
+<div class="content">
+<div class="imageblock left">
+<div class="content">
+<img src="./images/screen_corners.png" alt="screen corners" width="300">
+</div>
 </div>
 <div class="imageblock left">
 <div class="content">
-<img src="./images/screen_shift_2.png" alt="screen shift 2" width="400">
+<img src="./images/screen_shift_2_old_indices.png" alt="screen shift 2 old indices" width="300">
+</div>
+</div>
+<div class="imageblock left">
+<div class="content">
+<img src="./images/screen_shift_2_new_indices.png" alt="screen shift 2 new indices" width="300">
 </div>
 </div>
 </div>
 </div>
 <div class="openblock float-group">
-<div class="content">
-<div class="imageblock left">
-<div class="content">
-<img src="./images/screen_corners.png" alt="screen corners" width="400">
-</div>
 <div class="title">Output of conversion with <code>amount = -2</code></div>
+<div class="content">
+<div class="imageblock left">
+<div class="content">
+<img src="./images/screen_corners.png" alt="screen corners" width="300">
+</div>
 </div>
 <div class="imageblock left">
 <div class="content">
-<img src="./images/screen_shift_-2.png" alt="screen shift  2" width="400">
+<img src="./images/screen_shift_-2_old_indices.png" alt="screen shift  2 old indices" width="300">
+</div>
+</div>
+<div class="imageblock left">
+<div class="content">
+<img src="./images/screen_shift_-2_new_indices.png" alt="screen shift  2 new indices" width="300">
 </div>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>Numbers show the index of RGB values in the output data.</p>
+<p>On the left image the numbers show the indices of input RGB values before the transformation.
+In the middle the indices belong to the elements transformed to make clear how the transformation is applied.
+Last image shows the indices of the output data after the transformation.</p>
 </div>
 </div>
 </div>
@@ -1244,18 +1268,22 @@ The <code>threshold</code> value effects the decision if a color value is handle
 <dl>
 <dt class="hdlist1">Description</dt>
 <dd>
-<p>Resizes the image represented by the RGB data from the input to the resolution provided in the config values.</p>
+<p>Resizes the image represented by the input RGB data to the resolution provided in the config.</p>
 </dd>
 </dl>
 </div>
+<div class="openblock float-group">
+<div class="title">Resized image</div>
+<div class="content">
 <div class="imageblock">
 <div class="content">
 <img src="./images/screen_resize.png" alt="Resized" width="400">
 </div>
-<div class="title">Resized image</div>
+</div>
+</div>
 </div>
 <div class="paragraph">
-<p>Numbers show the index of RGB values in the output data.</p>
+<p>Numbers are indices of RGB values in the output data array.</p>
 </div>
 </div>
 </div>
@@ -1421,7 +1449,7 @@ It might be used by the grabber to show the user the name of the connected engin
 <div id="footer">
 <div id="footer-text">
 Version 0.1<br>
-Last updated 2021-01-12 01:32:07 UTC
+Last updated 2021-01-12 08:30:43 UTC
 </div>
 </div>
 </body>
