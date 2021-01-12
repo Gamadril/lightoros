@@ -13,19 +13,24 @@ This plugin is mainly used to change the direction of LED data for an ambilight 
 If `keep_first` is set to true, the first value of input data is kept at it's position.
 
 [.float-group]
---
 .Output of conversion with `keep_first = false`
-image::screen_corners.png[float="left", 400]
-image::screen_reverse.png[float="left",400]
+--
+image::screen_corners.png[float="left",300]
+image::screen_reverse_old_indices.png[float="left",300]
+image::screen_reverse_new_indices.png[float="left",300]
 --
 
 [.float-group]
---
 .Output of conversion with `keep_first = true`
-image::screen_corners.png[float="left", 400]
-image::screen_reverse_fixed_first.png[float="left",400]
+--
+image::screen_corners.png[float="left", 300]
+image::screen_reverse_fixed_first_old_indices.png[float="left",300]
+image::screen_reverse_fixed_first_new_indices.png[float="left",300]
 --
 
-Numbers show the index of RGB values in the output data.
+On the left image the numbers show the indices of input RGB values before the transformation.
+In the middle the indices belong to the elements transformed to make clear how the transformation is applied.
+Last image shows the indices of the output data after the transformation.
+
 
 

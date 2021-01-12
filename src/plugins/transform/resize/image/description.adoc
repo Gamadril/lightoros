@@ -9,9 +9,12 @@ Config::
 }
 --
 Description::
-Resizes the image represented by the RGB data from the input to the resolution provided in the config values.
+Resizes the image represented by the input RGB data to the resolution provided in the config.
 
+[.float-group]
 .Resized image
+--
 image::screen_resize.png[Resized,400]
+--
 
-Numbers show the index of RGB values in the output data.
+Numbers are indices of RGB values in the output data array.

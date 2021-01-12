@@ -13,18 +13,18 @@ If `drop_corners`is set to true, the first and last values of the lines are igno
 This plugin is mainly used for an ambilight installation around/behind a display.
 
 [.float-group]
---
 .Output of conversion with `drop_corners = false`
-image::screen_resize.png[float="left", 400]
-image::screen_corners.png[float="left",400]
+--
+image::screen_resize.png[float="left",300]
+image::screen_corners.png[float="left",300]
 --
 
 [.float-group]
---
 .Output of conversion with `drop_corners = true`
-image::screen_resize.png[float="left", 400]
-image::screen_drop_corners.png[float="left",400]
+--
+image::screen_resize.png[float="left",300]
+image::screen_drop_corners.png[float="left",300]
 --
 
-Numbers show the index of RGB values in the output data.
+Numbers show the indices of RGB values before and after the transformation.
 
