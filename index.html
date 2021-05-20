@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.12">
-<meta name="author" content="Daniel Wiese&#169; aka Gamadril 2020">
+<meta name="generator" content="Asciidoctor 2.0.15">
+<meta name="author" content="Daniel Wiese&#169; aka Gamadril 2021">
 <title>Lightoros: Flexible LED engine</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -95,9 +95,6 @@ dl dd{margin-bottom:1.25em}
 abbr,acronym{text-transform:uppercase;font-size:90%;color:rgba(0,0,0,.8);border-bottom:1px dotted #ddd;cursor:help}
 abbr{text-transform:none}
 blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
-blockquote cite{display:block;font-size:.9375em;color:rgba(0,0,0,.6)}
-blockquote cite::before{content:"\2014 \0020"}
-blockquote cite a,blockquote cite a:visited{color:rgba(0,0,0,.6)}
 blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
 @media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
 h1{font-size:2.75em}
@@ -262,7 +259,7 @@ pre.pygments .lineno::before{content:"";margin-right:-.125em}
 .quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
 .quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
 .quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
-.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;text-align:left;margin-right:0}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
 p.tableblock:last-child{margin-bottom:0}
 td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
 td.tableblock>.content>:last-child{margin-bottom:-1.25em}
@@ -443,10 +440,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="header">
 <h1>Lightoros: Flexible LED engine</h1>
 <div class="details">
-<span id="author" class="author">Daniel Wiese&#169; aka Gamadril 2020</span><br>
+<span id="author" class="author">Daniel Wiese&#169; aka Gamadril 2021</span><br>
 <span id="revnumber">version 0.1,</span>
-<span id="revdate">28.11.2020</span>
-<br><span id="revremark">First draft</span>
+<span id="revdate">19.01.2021</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -502,6 +498,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel3">
 <li><a href="#_convert">Convert</a>
 <ul class="sectlevel4">
+<li><a href="#_dim_converter">Dim Converter</a></li>
 <li><a href="#_rectangle_converter">Rectangle Converter</a></li>
 <li><a href="#_reverse_converter">Reverse Converter</a></li>
 <li><a href="#_shift_converter">Shift Converter</a></li>
@@ -574,7 +571,8 @@ Each input pipe runs in its own thread.</p>
 <div class="sect2">
 <h3 id="_output_pipes">Output Pipes</h3>
 <div class="paragraph">
-<p>An output pipe has exactly one output plugin as last member of the pipe and might also have optional members for modifing data (<a href="#_transform">Transform</a>) before the output plugin consumes it.</p>
+<p>An output pipe has exactly one output plugin as last member of the pipe and might also have optional members for modifing data (<a href="#_transform">Transform</a>) before the output plugin consumes it.
+Each output pipe runs in its own thread.</p>
 </div>
 </div>
 </div>
@@ -824,7 +822,7 @@ This plugin is useful when embedding the lightoros engine in an android app.</p>
 The plugin acts as a unix socket client and tries to connect to the screen grabber using the <code>path</code> config parameters.
 After establishing a connection the plugin will send the <code>client_name</code> parameter to identify itself.
 The plugin also sends the parameters <code>width</code> and <code>height</code> to tell the server the resolution of the target image.
-This plugin was created after tring to port the whole lightoros engine to android OS.
+This plugin was created after trying to port the whole lightoros engine to android OS.
 Android has a framebuffer device, but user applications do not have direct access to it.
 The same restriction exists for tcp communication from the native code - access denied when opening tcp socket to the remote android grabber from rust code.
 The next idea was to use unix sockets with abstract addresses, so this plugin was born.
@@ -863,6 +861,7 @@ Output plugins are always at the last place in an output pipe.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code>{
+    protocol: string("tpm2" | "raw"),
     path: string,
 }</code></pre>
 </div>
@@ -871,8 +870,10 @@ Output plugins are always at the last place in an output pipe.</p>
 <dl>
 <dt class="hdlist1">Description</dt>
 <dd>
-<p>Writes the RGB data to file system using the <code>path</code> parameter.
-No additianal headers are added to the output.</p>
+<p>Writes the RGB data to a named pipe using the <code>path</code> parameter.
+<code>protocol</code> defines the data protocol to use when writing data to file system.<br>
+<code>protocol = raw</code> - No additional headers are added to the output.<br>
+<code>protocol = tpm2</code> - RGB data is written using TPM2 protocol.<br></p>
 </dd>
 </dl>
 </div>
@@ -963,6 +964,33 @@ Transform plugins are separated in groups which describe their main task.</p>
 <h4 id="_convert">Convert</h4>
 <div class="paragraph">
 <p>Converter plugins transform RGB data from one type/presentation to another.</p>
+</div>
+<div class="sect4">
+<h5 id="_dim_converter">Dim Converter</h5>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Kind</dt>
+<dd>
+<p><code>ConvertDimTransform</code></p>
+</dd>
+<dt class="hdlist1">Config</dt>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>{
+    brigthness: integer(0-100)
+}</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Description</dt>
+<dd>
+<p>Applies the <code>brightness</code> percentage value to all values. Used to dim the brightness of LEDs.</p>
+</dd>
+</dl>
+</div>
 </div>
 <div class="sect4">
 <h5 id="_rectangle_converter">Rectangle Converter</h5>
@@ -1268,7 +1296,8 @@ The <code>threshold</code> value effects the decision if a color value is handle
 <dl>
 <dt class="hdlist1">Description</dt>
 <dd>
-<p>Resizes the image represented by the input RGB data to the resolution provided in the config.</p>
+<p>Resizes the image represented by the input RGB data to the resolution provided in the config.
+The transformation is done using the nearest-neighbor resampling.</p>
 </dd>
 </dl>
 </div>
@@ -1449,7 +1478,7 @@ It might be used by the grabber to show the user the name of the connected engin
 <div id="footer">
 <div id="footer-text">
 Version 0.1<br>
-Last updated 2021-01-12 08:30:43 UTC
+Last updated 2021-05-20 19:59:11 UTC
 </div>
 </div>
 </body>
