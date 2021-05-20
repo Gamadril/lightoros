@@ -4,9 +4,12 @@ Config::
 [source]
 --
 {
+    protocol: string("tpm2" | "raw"),
     path: string,
 }
 --
 Description::
-Writes the RGB data to file system using the `path` parameter.
-No additianal headers are added to the output.
+Writes the RGB data to a named pipe using the `path` parameter.
+`protocol` defines the data protocol to use when writing data to file system. +
+`protocol = raw` - No additional headers are added to the output. +
+`protocol = tpm2` - RGB data is written using TPM2 protocol. +

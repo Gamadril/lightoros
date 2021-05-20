@@ -4,8 +4,8 @@
 
 
 = Lightoros: Flexible LED engine
-Daniel Wiese(C) aka Gamadril 2020
-v 0.1, 28.11.2020: First draft
+Daniel Wiese(C) aka Gamadril 2021
+v 0.1, 19.01.2021
 :toc: left
 :toclevels: 4
 
@@ -30,6 +30,7 @@ Each input pipe runs in its own thread.
 
 === Output Pipes
 An output pipe has exactly one output plugin as last member of the pipe and might also have optional members for modifing data (<<Transform>>) before the output plugin consumes it.
+Each output pipe runs in its own thread.
 
 == Plugins
 The full power of the lightoros system is provided by different plugins.
@@ -89,6 +90,8 @@ Transform plugins are separated in groups which describe their main task.
 
 ==== Convert
 Converter plugins transform RGB data from one type/presentation to another.
+
+include::{plugins_dir}/transform/convert/dim/description.adoc[]
 
 include::{plugins_dir}/transform/convert/rectangle/description.adoc[]
 

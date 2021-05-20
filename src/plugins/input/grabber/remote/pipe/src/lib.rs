@@ -19,6 +19,7 @@ struct Config {
 
 struct RemoteScreenPipeGrabberInput {
     path: String,
+    file: Option<File>,
 }
 
 impl std::fmt::Display for RemoteScreenPipeGrabberInput {
@@ -33,6 +34,7 @@ impl RemoteScreenPipeGrabberInput {
 
         let plugin = RemoteScreenPipeGrabberInput {
             path: config.path.clone(),
+            file: None,
         };
         Ok(Box::new(plugin))
     }
@@ -64,13 +66,19 @@ impl PluginInputTrait for RemoteScreenPipeGrabberInput {
     }
 
     fn get(&mut self) -> PluginResult<TraitData> {
-        let path = Path::new(&self.path);
-        let mut file = match File::open(&path) {
-            Ok(file) => file,
-            Err(err) => {
-                return plugin_err!("Error opening file '{}': {}", &self.path, err);
-            }
-        };
+        if self.file.is_none() {
+            // openeing a pipe for reading blocks until another side opens it for writing
+            let path = Path::new(&self.path);
+            let pipe_file = match File::open(&path) {
+                Ok(file) => file,
+                Err(err) => {
+                    return plugin_err!("Error opening file '{}': {}", &self.path, err);
+                }
+            };
+            self.file = Some(pipe_file);
+        }
+
+        let mut file = self.file.as_ref().unwrap();
 
         // get incoming data size
         let mut data_in_len: Vec<u8> = vec![0; 4];
@@ -83,7 +91,7 @@ impl PluginInputTrait for RemoteScreenPipeGrabberInput {
 
         let in_data_size = get_u32!(data_in_len, 0) as usize;
 
-        let mut data_in: Vec<u8> =  vec!(0; in_data_size);
+        let mut data_in: Vec<u8> = vec![0; in_data_size];
         match file.read_exact(&mut data_in) {
             Ok(_) => (),
             Err(err) => {

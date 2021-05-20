@@ -15,7 +15,7 @@ Gets its screen data from a remote grabber on the same host using a unix socket.
 The plugin acts as a unix socket client and tries to connect to the screen grabber using the `path` config parameters.
 After establishing a connection the plugin will send the `client_name` parameter to identify itself.
 The plugin also sends the parameters `width` and `height` to tell the server the resolution of the target image.
-This plugin was created after tring to port the whole lightoros engine to android OS.
+This plugin was created after trying to port the whole lightoros engine to android OS.
 Android has a framebuffer device, but user applications do not have direct access to it.
 The same restriction exists for tcp communication from the native code - access denied when opening tcp socket to the remote android grabber from rust code.
 The next idea was to use unix sockets with abstract addresses, so this plugin was born.

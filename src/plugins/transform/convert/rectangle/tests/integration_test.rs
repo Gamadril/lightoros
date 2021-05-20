@@ -112,7 +112,6 @@ fn test_with_corners() {
     for y in 0..height_input {
         let rgb_in = out_copy[width_input * (height_input - 1 - y)];
         let rgb_out = rgb_data[((width_input - 1) * 2 + height_input - 1 + y) % rgb_data.len()];
-        println!("In: {}, Out: {}", rgb_in, rgb_out);
         assert!(rgb_in.r == rgb_out.r && rgb_in.g == rgb_out.g && rgb_in.b == rgb_out.b);
     }
 }

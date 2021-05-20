@@ -38,7 +38,7 @@ impl PluginOutputTrait for SerialTpm2Output {
         Ok(())
     }
 
-    fn send(&self, data: &TraitData) -> PluginResult<()> {
+    fn send(&mut self, data: &TraitData) -> PluginResult<()> {
         let mut serial = match serial::open(&self.config.port) {
             Ok(serial) => serial,
             Err(err) => {

@@ -1,0 +1,13 @@
+===== Dim Converter
+Kind:: `ConvertDimTransform`
+Config::
+[source]
+--
+{
+    brigthness: integer(0-100)
+}
+--
+Description::
+Applies the `brightness` percentage value to all values. Used to dim the brightness of LEDs.
+
+

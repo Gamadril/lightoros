@@ -30,7 +30,7 @@ pub unsafe extern "system" fn Java_de_gamadril_lightoros_MainActivity_destroyEng
 }
 
 #[no_mangle]
-pub unsafe extern "system" fn Java_de_gamadril_lightoros_MainActivity_initEngine(
+pub unsafe extern "system" fn Java_de_gamadril_lightoros_MainActivity_startEngine(
     env: JNIEnv,
     obj: JObject,
     config: JString,
@@ -45,29 +45,18 @@ pub unsafe extern "system" fn Java_de_gamadril_lightoros_MainActivity_initEngine
         .expect("Couldn't get plugins dir")
         .into();
 
+    debug!("----------- START ------------");
     let mut engine: MutexGuard<LightorosEngine> = env.get_rust_field(obj, "enginePtr").unwrap();
 
-    debug!("----------- INIT ------------");
-
-    //debug!("----------- CONFIG: {} ------------", config);
-    //debug!("----------- PLUGINS_DIR: {} ------------", plugins_dir);
+    debug!("----------- CONFIG: {} ------------", config);
+    debug!("----------- PLUGINS_DIR: {} ------------", plugins_dir);
 
     
-    let result = engine.init(config, plugins_dir);
+    let result = engine.start(config, plugins_dir);
 
     if let Err(e) = result {
         error!("ERROR: {}", e);
     } else {
         debug!("INIT DONE!");
     }
-}
-
-#[no_mangle]
-pub unsafe extern "system" fn Java_de_gamadril_lightoros_MainActivity_startEngine(
-    env: JNIEnv,
-    obj: JObject,
-) {
-    debug!("----------- START ------------");
-    let mut engine: MutexGuard<LightorosEngine> = env.get_rust_field(obj, "enginePtr").unwrap();
-    engine.start();
 }

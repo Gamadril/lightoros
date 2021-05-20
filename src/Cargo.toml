@@ -20,4 +20,5 @@ members = [
     "plugins/transform/convert/rectangle",
     "plugins/transform/convert/shift",
     "plugins/transform/convert/reverse",
+    "plugins/transform/convert/dim",
 ]

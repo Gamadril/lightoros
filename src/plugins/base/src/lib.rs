@@ -3,6 +3,7 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 
 pub use self::error::PluginError;
+mod error;
 
 #[derive(PartialEq)]
 pub enum PluginKind {
@@ -33,7 +34,7 @@ pub mod output {
 
     pub trait PluginOutputTrait: Send + Display {
         fn init(&mut self) -> PluginResult<()>;
-        fn send(&self, data: &TraitData) -> PluginResult<()>;
+        fn send(&mut self, data: &TraitData) -> PluginResult<()>;
     }
 }
 
@@ -190,4 +191,27 @@ macro_rules! plugin_config_or_return {
     }};
 }
 
-pub mod error;
+#[macro_export]
+macro_rules! print_image {
+    ($data: expr, $width: expr, $height: expr, $name: expr) => {{
+        let path = $name.to_owned();
+        let p = Path::new(&path);
+        if !p.exists() {
+            let size = $width as usize * $height as usize;
+            let mut buffer: Vec<u8> = Vec::with_capacity(size * 3);
+            for i in 0..size {
+                let pixel: &RGB = &$data[i];
+                buffer.push(pixel.r);
+                buffer.push(pixel.g);
+                buffer.push(pixel.b);
+            }
+            image::save_buffer(
+                path,
+                buffer.as_ref(),
+                $width as u32,
+                $height as u32,
+                image::ColorType::Rgb8,
+            ).unwrap();
+        }
+    }}
+}

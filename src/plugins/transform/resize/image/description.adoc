@@ -10,6 +10,7 @@ Config::
 --
 Description::
 Resizes the image represented by the input RGB data to the resolution provided in the config.
+The transformation is done using the nearest-neighbor resampling.
 
 [.float-group]
 .Resized image

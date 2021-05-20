@@ -231,7 +231,7 @@ impl LuaExtraInput {
                                     }
                                 }
 
-                                thread_tx.send(out).unwrap();
+                                thread_tx.send(out).ok();
                                 Ok(())
                             })
                             .unwrap(),

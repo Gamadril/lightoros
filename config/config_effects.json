@@ -11,7 +11,7 @@
                     "config": {
                         "source_folder": "src/plugins/input/extra/lua/effects",
                         "on_start_effect": {
-                            "name": "test",
+                            "name": "knight-rider",
                             "duration": 0
                         },
                         "screen": {
@@ -43,6 +43,12 @@
                     "kind": "ConvertShiftTransform",
                     "config": {
                         "amount": -15
+                    }
+                },
+                {
+                    "kind": "ConvertDimTransform",
+                    "config": {
+                        "brightness": 90
                     }
                 },
                 {

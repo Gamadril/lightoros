@@ -71,7 +71,7 @@ fn test_send_all() {
 
     let plugin = call_create(&config);
     assert!(plugin.is_ok());
-    let plugin = plugin.unwrap();
+    let mut plugin = plugin.unwrap();
 
     let size = 200 * 2 + 160 * 2;
     let mut out: Vec<RGB> = Vec::with_capacity(size);

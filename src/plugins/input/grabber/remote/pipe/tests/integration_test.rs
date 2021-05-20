@@ -36,7 +36,6 @@ fn test_get_info() {
     assert_eq!(plugin_info.filename, "lightoros_input_grabber_remote_pipe");
 }
 
-/*
 #[test]
 fn test_create() {
     let config = json!({
@@ -51,7 +50,6 @@ fn test_create_with_empty_config() {
     let plugin = call_create(&config);
     assert!(plugin.is_err());   
 }
-*/
 
 
 #[test]
@@ -62,6 +60,12 @@ fn test_create_with_init() {
     let plugin = call_create(&config);
     assert!(plugin.is_ok());
     let mut plugin = plugin.unwrap();
+    /*
+    std::thread::spawn(|| {
+        std::thread::sleep(std::time::Duration::from_millis(100));
+        File::create("./pipe_file").unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(100));
+    });
+    */
     assert!(plugin.init().is_ok());
-    assert!(plugin.get().is_ok());
 }

@@ -1,8 +1,8 @@
 use clap::crate_version;
 use clap::{App, Arg};
+use lightoros_engine::*;
 use std::fs;
 use std::path::Path;
-use lightoros_engine::*;
 
 // main entry point
 fn main() {
@@ -17,7 +17,7 @@ fn main() {
                 .value_name("FILE")
                 .help("Sets a custom config file")
                 .takes_value(true)
-                .required(true)
+                .required(true),
         )
         .arg(
             Arg::with_name("plugins dir")
@@ -26,7 +26,7 @@ fn main() {
                 .value_name("FOLDER")
                 .help("Sets the path to the plugins folder")
                 .takes_value(true)
-                .required(false)
+                .required(false),
         )
         .get_matches();
 
@@ -48,6 +48,26 @@ fn main() {
     let plugin_folder = exepath.into_os_string().into_string().unwrap().clone();
 
     let mut engine = LightorosEngine::new();
-    engine.init(config_str, plugin_folder).unwrap();
-    engine.start();
+    engine.start(config_str.clone(), plugin_folder.clone()).unwrap();
+
+    println!("Will loop");
+    loop {
+        let mut guess = String::new();
+
+        std::io::stdin()
+            .read_line(&mut guess)
+            .expect("Failed to read line");
+
+        let input = guess.trim();
+        println!("CMD: {}", input);
+
+        if input == "stop" {
+            println!("Stopping engine");
+            engine.stop().unwrap()
+            
+        } else if input == "start" {
+            println!("Starting engine");
+            engine.start(config_str.clone(), plugin_folder.clone()).unwrap()
+        }
+    }
 }

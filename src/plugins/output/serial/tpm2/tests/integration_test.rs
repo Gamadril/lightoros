@@ -4,10 +4,8 @@ use serde_json::json;
 use dlopen::symbor::Library;
 use once_cell::sync::Lazy;
 use std::path::PathBuf;
-use std::thread;
-use std::time::Duration;
 
-const PORT: &str = "/dev/tty.usbmodem14101";
+//const PORT: &str = "/dev/tty.usbmodem14101";
 
 static LIB_PATH: Lazy<PathBuf> = Lazy::new(test_cdylib::build_current_project);
 
@@ -73,11 +71,12 @@ fn test_send_to_invalid_port() {
     let out: Vec<RGB> = Vec::with_capacity(1);
     let data = plugin_data!(out, {});
     let result = plugin.unwrap().send(&data);
-    assert!(result.is_ok());
+    assert!(result.is_err());
 }
 
 // /dev/tty.usbmodem14201
 
+/*
 #[test]
 fn test_send_empty_data() {
     let config = json!({ "port": PORT });
@@ -128,3 +127,4 @@ fn test_send_data_green_dot() {
     let result = plugin.unwrap().send(&data);
     assert!(result.is_ok());
 }
+*/

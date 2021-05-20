@@ -50,7 +50,7 @@ impl PluginOutputTrait for NetUdpTpm2Output {
         Ok(())
     }
     
-    fn send(&self, data: &TraitData) -> PluginResult<()> {
+    fn send(&mut self, data: &TraitData) -> PluginResult<()> {
         let socket = match net::UdpSocket::bind("0.0.0.0:0") {
             Ok(socket) => socket,
             Err(err) => return plugin_err!("Error creating UDP Socket: {}", err)

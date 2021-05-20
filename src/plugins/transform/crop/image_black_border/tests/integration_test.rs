@@ -93,7 +93,7 @@ fn test_detect_borders() {
     let result = result.unwrap();
 
     let width_output: usize = get_meta_value(&result.meta, "width").unwrap();
-    let height_output: usize = get_meta_value(&result.meta, "width").unwrap();
+    let height_output: usize = get_meta_value(&result.meta, "height").unwrap();
 
     assert_eq!(width_output, 20);
     assert_eq!(height_output, 6);
@@ -136,7 +136,7 @@ fn test_detect_borders_on_test_image() {
     let result = result.unwrap();
 
     let width_output: usize = get_meta_value(&result.meta, "width").unwrap();
-    let height_output: usize = get_meta_value(&result.meta, "width").unwrap();
+    let height_output: usize = get_meta_value(&result.meta, "height").unwrap();
 
     assert_eq!(width_output, 2048);
     assert_eq!(height_output, 858);
